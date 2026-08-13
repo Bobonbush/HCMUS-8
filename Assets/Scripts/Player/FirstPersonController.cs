@@ -35,6 +35,14 @@ public class FirstPersonController : MonoBehaviour
     public float pitchMin = -88f;
     public float pitchMax = 88f;
     public bool invertY = false;
+    public bool invertX = false;
+
+    [Tooltip("Player-facing multiplier on top of the base sensitivity (Settings > Game).")]
+    [Range(0.1f, 3f)] public float lookSensitivityX = 1f;
+    [Range(0.1f, 3f)] public float lookSensitivityY = 1f;
+    [Tooltip("How fast the view catches up to the input. High is raw and immediate; low is heavy " +
+             "and smoothed. 15 is roughly indistinguishable from raw.")]
+    [Range(1f, 30f)] public float lookAcceleration = 15f;
 
     [Header("Speed")]
     public float walkSpeed = 3.2f;
@@ -81,6 +89,11 @@ public class FirstPersonController : MonoBehaviour
     [Tooltip("Below this speed no footsteps are produced.")]
     public float minStepSpeed = 0.55f;
 
+    [Header("Input")]
+    [Tooltip("Assets/InputSystem_Actions.inputactions. Every key this motor reads comes from here " +
+             "so the Settings > Keyboard tab can rebind it; nothing is hardcoded.")]
+    public InputActionAsset inputActions;
+
     [Header("Cursor")]
     public bool lockCursorOnStart = true;
 
@@ -113,6 +126,7 @@ public class FirstPersonController : MonoBehaviour
     Vector3 _velocity;
     Vector2 _moveInput;
     Vector2 _lookDeltaDegrees;
+    Vector2 _smoothedLook;
     float _yaw;
     float _pitch;
 
@@ -129,13 +143,12 @@ public class FirstPersonController : MonoBehaviour
 
     readonly RaycastHit[] _groundHits = new RaycastHit[8];
 
+    InputActionMap _playerMap;
     InputAction _moveAction;
-    InputAction _lookMouseAction;
-    InputAction _lookStickAction;
+    InputAction _lookAction;
     InputAction _sprintAction;
     InputAction _jumpAction;
-    InputAction _unlockAction;
-    InputAction _clickAction;
+    bool _inputEnabled = true;
 
     // ---------------------------------------------------------------- lifecycle
 
@@ -146,7 +159,7 @@ public class FirstPersonController : MonoBehaviour
         _yaw = transform.eulerAngles.y;
         if (cameraPivot != null) _pitch = NormalizeAngle(cameraPivot.localEulerAngles.x);
 
-        BuildInputActions();
+        ResolveInputActions();
     }
 
     void Start()
@@ -156,73 +169,55 @@ public class FirstPersonController : MonoBehaviour
 
     void OnEnable()
     {
-        _moveAction.Enable();
-        _lookMouseAction.Enable();
-        _lookStickAction.Enable();
-        _sprintAction.Enable();
-        _jumpAction.Enable();
-        _unlockAction.Enable();
-        _clickAction.Enable();
+        _playerMap?.Enable();
     }
 
     void OnDisable()
     {
-        _moveAction.Disable();
-        _lookMouseAction.Disable();
-        _lookStickAction.Disable();
-        _sprintAction.Disable();
-        _jumpAction.Disable();
-        _unlockAction.Disable();
-        _clickAction.Disable();
+        _playerMap?.Disable();
     }
 
-    void OnDestroy()
+    /// <summary>
+    /// Pulls the actions out of the shared asset. They are NOT built in code any more: a key that is
+    /// created here would not appear in Settings > Keyboard, so rebinding it would look like it
+    /// worked while the old key kept firing. See the rule at the top of Game.UI.InputBindingService.
+    /// </summary>
+    void ResolveInputActions()
     {
-        _moveAction?.Dispose();
-        _lookMouseAction?.Dispose();
-        _lookStickAction?.Dispose();
-        _sprintAction?.Dispose();
-        _jumpAction?.Dispose();
-        _unlockAction?.Dispose();
-        _clickAction?.Dispose();
-    }
+        if (inputActions == null)
+        {
+            inputActions = Game.UI.InputBindingService.Instance != null
+                ? Game.UI.InputBindingService.Instance.actions
+                : null;
+        }
 
-    void BuildInputActions()
-    {
-        _moveAction = new InputAction("Move", InputActionType.Value, expectedControlType: "Vector2");
-        _moveAction.AddCompositeBinding("2DVector(mode=2)")
-            .With("Up", "<Keyboard>/w")
-            .With("Down", "<Keyboard>/s")
-            .With("Left", "<Keyboard>/a")
-            .With("Right", "<Keyboard>/d");
-        _moveAction.AddCompositeBinding("2DVector(mode=2)")
-            .With("Up", "<Keyboard>/upArrow")
-            .With("Down", "<Keyboard>/downArrow")
-            .With("Left", "<Keyboard>/leftArrow")
-            .With("Right", "<Keyboard>/rightArrow");
-        _moveAction.AddBinding("<Gamepad>/leftStick");
+        if (inputActions == null)
+        {
+            enabled = false;
+            Debug.LogError(
+                "FirstPersonController: no InputActionAsset assigned. Drag " +
+                "Assets/InputSystem_Actions.inputactions onto the Input Actions field.", this);
+            return;
+        }
 
-        // Mouse and stick are separate actions: mouse delta is in pixels-per-frame
-        // while the stick is a -1..1 axis, so they need different scaling.
-        _lookMouseAction = new InputAction("LookMouse", InputActionType.Value, expectedControlType: "Vector2");
-        _lookMouseAction.AddBinding("<Mouse>/delta");
+        // Registering the asset first means saved key overrides are already applied by the time
+        // the actions below are read.
+        Game.UI.InputBindingService.EnsureExists(inputActions);
 
-        _lookStickAction = new InputAction("LookStick", InputActionType.Value, expectedControlType: "Vector2");
-        _lookStickAction.AddBinding("<Gamepad>/rightStick");
+        _playerMap = inputActions.FindActionMap("Player", false);
+        _moveAction = inputActions.FindAction("Player/Move", false);
+        _lookAction = inputActions.FindAction("Player/Look", false);
+        _sprintAction = inputActions.FindAction("Player/Sprint", false);
+        _jumpAction = inputActions.FindAction("Player/Jump", false);
 
-        _sprintAction = new InputAction("Sprint", InputActionType.Button);
-        _sprintAction.AddBinding("<Keyboard>/leftShift");
-        _sprintAction.AddBinding("<Gamepad>/leftStickPress");
-
-        _jumpAction = new InputAction("Jump", InputActionType.Button);
-        _jumpAction.AddBinding("<Keyboard>/space");
-        _jumpAction.AddBinding("<Gamepad>/buttonSouth");
-
-        _unlockAction = new InputAction("UnlockCursor", InputActionType.Button);
-        _unlockAction.AddBinding("<Keyboard>/escape");
-
-        _clickAction = new InputAction("RelockCursor", InputActionType.Button);
-        _clickAction.AddBinding("<Mouse>/leftButton");
+        if (_playerMap == null || _moveAction == null || _lookAction == null ||
+            _sprintAction == null || _jumpAction == null)
+        {
+            enabled = false;
+            Debug.LogError(
+                "FirstPersonController: the assigned asset is missing one of Player/Move, " +
+                "Player/Look, Player/Sprint or Player/Jump.", this);
+        }
     }
 
     // ---------------------------------------------------------------- update
@@ -232,7 +227,6 @@ public class FirstPersonController : MonoBehaviour
         float dt = Time.deltaTime;
         if (dt <= 0f) return;
 
-        HandleCursor();
         ReadInput();
         UpdateLook(dt);
         UpdateGroundState(dt);
@@ -241,10 +235,20 @@ public class FirstPersonController : MonoBehaviour
         UpdateStepCycle();
     }
 
-    void HandleCursor()
+    /// <summary>
+    /// Suspends look/move input while a menu is up. The pause menu owns this — and owns the cursor —
+    /// because Escape belongs to exactly one system.
+    /// </summary>
+    public void SetInputEnabled(bool value)
     {
-        if (_unlockAction.WasPressedThisFrame()) SetCursorLocked(false);
-        else if (_clickAction.WasPressedThisFrame() && Cursor.lockState != CursorLockMode.Locked) SetCursorLocked(true);
+        _inputEnabled = value;
+        if (value) return;
+
+        _moveInput = Vector2.zero;
+        _lookDeltaDegrees = Vector2.zero;
+        _smoothedLook = Vector2.zero;
+        _sprintToggleState = false;
+        _jumpBufferTimer = 0f;
     }
 
     public void SetCursorLocked(bool locked)
@@ -255,6 +259,12 @@ public class FirstPersonController : MonoBehaviour
 
     void ReadInput()
     {
+        if (!_inputEnabled)
+        {
+            _moveInput = Vector2.zero;
+            return;
+        }
+
         _moveInput = _moveAction.ReadValue<Vector2>();
         if (_moveInput.sqrMagnitude > 1f) _moveInput.Normalize();
 
@@ -274,21 +284,56 @@ public class FirstPersonController : MonoBehaviour
 
     void UpdateLook(float dt)
     {
-        // Mouse delta is already a per-frame value: it must NOT be scaled by deltaTime.
-        Vector2 mouse = _lookMouseAction.ReadValue<Vector2>() * mouseSensitivity;
-        Vector2 stick = _lookStickAction.ReadValue<Vector2>();
-        // Squared response gives fine control near centre without losing top speed.
-        stick = stick * stick.magnitude * gamepadLookSpeed * dt;
+        Vector2 mouse = Vector2.zero;
+        Vector2 stick = Vector2.zero;
+
+        if (_inputEnabled)
+        {
+            // One Look action covers both devices in the asset, so the source decides the scaling:
+            // mouse delta is already a per-frame value (it must NOT be scaled by deltaTime) while the
+            // stick is a -1..1 axis.
+            Vector2 raw = _lookAction.ReadValue<Vector2>();
+            bool fromGamepad = _lookAction.activeControl != null &&
+                               _lookAction.activeControl.device is Gamepad;
+
+            if (fromGamepad)
+                // Squared response gives fine control near centre without losing top speed.
+                stick = raw * raw.magnitude * gamepadLookSpeed * dt;
+            else
+                mouse = raw * mouseSensitivity;
+        }
+
+        // Player-facing sensitivity from Settings > Game, applied to both devices.
+        mouse.x *= lookSensitivityX;
+        mouse.y *= lookSensitivityY;
+        stick.x *= lookSensitivityX;
+        stick.y *= lookSensitivityY;
 
         float yawDelta = mouse.x + stick.x;
         float pitchDelta = mouse.y + stick.y;
         if (!invertY) pitchDelta = -pitchDelta;
+        if (invertX) yawDelta = -yawDelta;
 
         if (Cursor.lockState != CursorLockMode.Locked)
         {
             // Ignore mouse while the cursor is free so editor clicks do not fling the view.
-            yawDelta = stick.x;
+            yawDelta = invertX ? -stick.x : stick.x;
             pitchDelta = invertY ? stick.y : -stick.y;
+        }
+
+        // Camera Acceleration: how quickly the view catches up to the raw input. At the default of
+        // 15 the smoothing is imperceptible, so Khoa's original feel is unchanged unless the player
+        // deliberately turns it down.
+        if (lookAcceleration < 29.5f && dt > 0f)
+        {
+            float catchUp = 1f - Mathf.Exp(-lookAcceleration * dt);
+            _smoothedLook = Vector2.Lerp(_smoothedLook, new Vector2(yawDelta, pitchDelta), catchUp);
+            yawDelta = _smoothedLook.x;
+            pitchDelta = _smoothedLook.y;
+        }
+        else
+        {
+            _smoothedLook = new Vector2(yawDelta, pitchDelta);
         }
 
         _yaw += yawDelta;

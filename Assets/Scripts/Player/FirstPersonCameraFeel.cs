@@ -104,8 +104,13 @@ public class FirstPersonCameraFeel : MonoBehaviour
     public float strafeRoll = 0.9f;
     public float strafeRollSpeed = 6f;
 
+    [Header("Player Setting")]
+    [Tooltip("Master multiplier for head bob and every footstep/land/jump kick. Driven by " +
+             "Settings > Game > Camera Shake; 0 gives a completely still camera.")]
+    [Range(0f, 2f)] public float shakeScale = 1f;
+
     [Header("Field of View")]
-    [Tooltip("Leave at 0 to capture the camera's FOV at startup.")]
+    [Tooltip("Leave at 0 to capture the camera's FOV at startup. Settings > Video > FOV writes here.")]
     public float baseFieldOfView = 0f;
     [Tooltip("Degrees added at full sprint.")]
     public float sprintFovBoost = 7f;
@@ -187,7 +192,8 @@ public class FirstPersonCameraFeel : MonoBehaviour
 
     void HandleFootstep(FirstPersonController.Foot foot, float intensity)
     {
-        float impulse = stepImpulse + stepImpulseSprintBonus * intensity;
+        intensity *= shakeScale;
+        float impulse = (stepImpulse + stepImpulseSprintBonus * intensity) * shakeScale;
         _springY.Impulse(-impulse);
         _springPitch.Impulse(stepPitchImpulse * intensity);
         _springRoll.Impulse((foot == FirstPersonController.Foot.Left ? -1f : 1f) * stepRollImpulse * intensity);
@@ -199,6 +205,7 @@ public class FirstPersonCameraFeel : MonoBehaviour
         if (strength <= 0.01f) return;
         // Squared so gentle step-downs stay subtle and real falls really land.
         strength *= strength;
+        strength *= shakeScale;
         _springY.Impulse(-landImpulse * strength);
         _springPitch.Impulse(landPitchImpulse * strength);
         _springRoll.Impulse(Random.Range(-1f, 1f) * landPitchImpulse * 0.12f * strength);
@@ -206,8 +213,8 @@ public class FirstPersonCameraFeel : MonoBehaviour
 
     void HandleJump()
     {
-        _springY.Impulse(-jumpImpulse);
-        _springPitch.Impulse(-jumpImpulse * 12f);
+        _springY.Impulse(-jumpImpulse * shakeScale);
+        _springPitch.Impulse(-jumpImpulse * 12f * shakeScale);
     }
 
     // ---------------------------------------------------------------- update
@@ -247,7 +254,9 @@ public class FirstPersonCameraFeel : MonoBehaviour
         _bobWeight = Mathf.Lerp(_bobWeight, moving ? 1f : 0f, 1f - Mathf.Exp(-bobBlendSpeed * dt));
 
         float phase = controller.StepPhase;
-        float amplitude = _bobWeight * Mathf.Lerp(bobWalkScale, 1f, speedRatio);
+        // shakeScale is the player-facing "Camera Shake" slider: 0 removes the gait entirely,
+        // 1 is the tuned default.
+        float amplitude = _bobWeight * Mathf.Lerp(bobWalkScale, 1f, speedRatio) * shakeScale;
 
         // Vertical dips once per footfall (phase advances PI per step), the sideways sway
         // and roll take a whole stride, which is how a real gait works.

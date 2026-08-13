@@ -73,6 +73,11 @@ public class FirstPersonFootsteps : MonoBehaviour
         _source.loop = false;
         _source.spatialBlend = 0f;          // your own footsteps are not positional
 
+        // Route through the Sfx group so Settings > Audio > Sound Volume actually reaches these.
+        // An AudioSource with no group goes straight to the listener and ignores the mixer entirely.
+        if (_source.outputAudioMixerGroup == null)
+            _source.outputAudioMixerGroup = Game.UI.SettingsService.FindMixerGroup("Sfx");
+
         if (controller == null) controller = GetComponent<FirstPersonController>();
         if (cameraFeel == null) cameraFeel = GetComponentInChildren<FirstPersonCameraFeel>();
 
