@@ -836,8 +836,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonFootsteps
   controller: {fileID: 367778411}
   cameraFeel: {fileID: 192823141}
-  footstepClips: []
+  footstepClips:
+  - {fileID: 8300000, guid: a99fd9cd75e56c34d869b94c9b61c7f6, type: 3}
+  - {fileID: 8300000, guid: ff7f060e05b15324bbfec380232be917, type: 3}
+  - {fileID: 8300000, guid: acb1d5533a2ecd1499ad7b480a3f1257, type: 3}
+  - {fileID: 8300000, guid: fdb94bc2d23c3ec42a20571d104d81a3, type: 3}
+  - {fileID: 8300000, guid: effd6da82a574714ba49e1b349b302be, type: 3}
+  - {fileID: 8300000, guid: a0eba6376c158844181ac1c3a9cdb9e9, type: 3}
+  - {fileID: 8300000, guid: 42d588feb46e84a49bc14c88f19c3964, type: 3}
+  - {fileID: 8300000, guid: d3233c0025513bc4faa812c368bd2b2d, type: 3}
   landingClips: []
+  breathLoopClip: {fileID: 8300000, guid: ed504d0d45d3abf4e9c8ccb946ee7e35, type: 3}
   footstepVolume: 0.5
   sprintVolumeBoost: 0.35
   pitchVariation: 0.07
@@ -847,10 +856,12 @@ MonoBehaviour:
   landFullImpactSpeed: 12
   minLandImpactSpeed: 2.5
   breathingEnabled: 1
-  breathVolume: 0.32
-  breathThreshold: 0.12
-  breathIntervalExhausted: 0.85
-  breathIntervalRested: 2.6
+  breathVolume: 0.4
+  breathThreshold: 0.35
+  breathHysteresis: 0.55
+  breathFadeIn: 1.6
+  breathFadeOut: 3
+  breathRateExhausted: 1.5
 --- !u!82 &367778410
 AudioSource:
   m_ObjectHideFlags: 0
