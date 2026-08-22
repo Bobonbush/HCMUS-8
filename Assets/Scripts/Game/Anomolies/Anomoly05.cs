@@ -1,43 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Walking up to the glass, a doppelganger walks right behind you. The figure shadows
-// the player's movement (same heading, fixed distance behind) but only materialises
-// while the player is near one of the window panes, so you catch it in the corner of
-// your eye through the glass - or when you spin around.
+// A doppelganger follows right behind you the whole round. It walks in your
+// footsteps - literally: it follows the trail of positions you walked through,
+// a couple of metres back - so spinning around catches it standing there.
 public class Anomoly05 : MonoBehaviour, Anomoly
 {
 
-    [Tooltip("The doppelganger silhouette.")]
+    [Tooltip("The follower (the ghost). Hidden until Evaluate.")]
     public ShadowFigure figure;
 
-    [Tooltip("Window panes that trigger the doppelganger when the player is near.")]
-    public List<Transform> windowZones = new List<Transform>();
+    [Tooltip("How far behind along your own path it follows, in metres.")]
+    public float followDistance = 2.6f;
 
-    [Tooltip("Player-to-window distance that makes the doppelganger appear.")]
-    public float triggerDistance = 4.2f;
-
-    [Tooltip("Distance at which it disappears again (hysteresis, keep above triggerDistance).")]
-    public float releaseDistance = 6f;
-
-    [Tooltip("How far behind the player it walks.")]
-    public float behindDistance = 2.6f;
+    [Tooltip("Its movement speed. Slightly above player sprint speed so it never falls behind.")]
+    public float moveSpeed = 6.5f;
 
     Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
 
     private bool active;
-    private bool shown;
+    private readonly List<Vector3> trail = new List<Vector3>();
+    private const float SampleSpacing = 0.3f;
+    private const int MaxSamples = 64;
 
     public void Evaluate()
     {
         active = true;
-        shown = false;
+        trail.Clear();
     }
 
     public void Restore()
     {
         active = false;
-        shown = false;
+        trail.Clear();
         if (figure != null) figure.Show(false);
     }
 
@@ -47,35 +42,47 @@ public class Anomoly05 : MonoBehaviour, Anomoly
         Transform player = GameManager.Instance.GetPlayerTransform();
         if (player == null) return;
 
-        // Only react to a player on this floor (the host sits under the floor root).
+        // Only haunt a player on this floor (the host sits under the floor root).
         float floorY = transform.parent != null ? transform.parent.position.y : transform.position.y;
         if (Mathf.Abs(player.position.y - floorY) > 3f)
         {
-            if (shown) { shown = false; figure.Show(false); }
+            if (figure.gameObject.activeSelf) figure.Show(false);
+            trail.Clear();
             return;
         }
 
-        float nearest = float.MaxValue;
-        foreach (Transform zone in windowZones)
+        // Record the player's path.
+        if (trail.Count == 0 || (player.position - trail[trail.Count - 1]).sqrMagnitude > SampleSpacing * SampleSpacing)
         {
-            if (zone == null) continue;
-            nearest = Mathf.Min(nearest, Vector3.Distance(player.position, zone.position));
+            trail.Add(player.position);
+            if (trail.Count > MaxSamples) trail.RemoveAt(0);
         }
 
-        if (!shown && nearest < triggerDistance) { shown = true; figure.Show(true); }
-        else if (shown && nearest > releaseDistance) { shown = false; figure.Show(false); }
-
-        if (shown)
+        // Find the point on the trail followDistance behind the player (walking backwards).
+        Vector3 target = trail[0];
+        float distance = 0f;
+        Vector3 previous = player.position;
+        for (int i = trail.Count - 1; i >= 0; i--)
         {
-            Vector3 forward = player.forward;
-            forward.y = 0f;
-            forward.Normalize();
-            Vector3 pos = player.position - forward * behindDistance;
-            pos.y = player.position.y;
-            figure.transform.position = pos;
-            // Same heading as the player, like a shadow following in step.
-            figure.transform.rotation = Quaternion.Euler(0f, player.eulerAngles.y, 0f);
+            distance += Vector3.Distance(previous, trail[i]);
+            previous = trail[i];
+            if (distance >= followDistance) { target = trail[i]; break; }
         }
+
+        // Until you have walked far enough there is nothing to stand on - stay hidden.
+        if (distance < followDistance)
+        {
+            if (figure.gameObject.activeSelf) figure.Show(false);
+            return;
+        }
+
+        if (!figure.gameObject.activeSelf)
+        {
+            figure.transform.position = target;
+            figure.Show(true);
+        }
+        figure.transform.position = Vector3.MoveTowards(figure.transform.position, target, moveSpeed * Time.deltaTime);
+        figure.facePlayer = true;   // it is always looking at you
     }
 
     public Anomoly.EvaluateType getType()
