@@ -510,7 +510,7 @@ GameObject:
   - component: {fileID: 192823138}
   - component: {fileID: 192823141}
   - component: {fileID: 192823142}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -815,7 +815,7 @@ GameObject:
   - component: {fileID: 367778409}
   - component: {fileID: 367778414}
   - component: {fileID: 367778415}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1980,7 +1980,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 774879745}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CameraPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4387,6 +4387,75 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1856475676}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &1926024063
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 413180765784241417, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: MeshLight
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4902293494056113554, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_Name
+      value: Floor
+      objectReference: {fileID: 0}
+    - target: {fileID: 4902293494056113554, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5308955724740665356, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: MeshLight
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 49.09616
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -42.53338
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6269620153155448819, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
 --- !u!1 &1974060397
 GameObject:
   m_ObjectHideFlags: 0
@@ -4530,6 +4599,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   FloorObject: {fileID: 4902293494056113554, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
   playerTransform: {fileID: 367778413}
+  AlwaysAnomoly: 1
 --- !u!4 &2006590185
 Transform:
   m_ObjectHideFlags: 0
@@ -8016,3 +8086,4 @@ SceneRoots:
   - {fileID: 1819094119}
   - {fileID: 2105348827}
   - {fileID: 2006590185}
+  - {fileID: 1926024063}
