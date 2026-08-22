@@ -852,8 +852,6 @@ MonoBehaviour:
   breathLoopClip: {fileID: 8300000, guid: ed504d0d45d3abf4e9c8ccb946ee7e35, type: 3}
   footstepVolume: 0.5
   sprintVolumeBoost: 0.35
-  pitchVariation: 0.07
-  sprintPitchDrop: 0.08
   footPan: 0.22
   landingVolume: 0.8
   landFullImpactSpeed: 12
@@ -864,7 +862,6 @@ MonoBehaviour:
   breathHysteresis: 0.55
   breathFadeIn: 1.6
   breathFadeOut: 3
-  breathRateExhausted: 1.5
 --- !u!82 &367778410
 AudioSource:
   m_ObjectHideFlags: 0
@@ -3384,6 +3381,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
   m_Asset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_ActionId: 0489e84a-4833-4c40-bfae-cea84b696689
+--- !u!1 &1367509704
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1367509706}
+  - component: {fileID: 1367509705}
+  m_Layer: 0
+  m_Name: AnomolyTester
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1367509705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1367509704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ed046d0320fc3c478e734d45ae3f644, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnomolyTester
+  hotkeysEnabled: 1
+--- !u!4 &1367509706
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1367509704}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1408634113
 GameObject:
   m_ObjectHideFlags: 0
@@ -8101,3 +8143,4 @@ SceneRoots:
   - {fileID: 2105348827}
   - {fileID: 2006590185}
   - {fileID: 1926024063}
+  - {fileID: 1367509706}
