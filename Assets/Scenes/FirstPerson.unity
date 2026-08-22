@@ -845,7 +845,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: a0eba6376c158844181ac1c3a9cdb9e9, type: 3}
   - {fileID: 8300000, guid: 42d588feb46e84a49bc14c88f19c3964, type: 3}
   - {fileID: 8300000, guid: d3233c0025513bc4faa812c368bd2b2d, type: 3}
-  landingClips: []
+  landingClips:
+  - {fileID: 8300000, guid: 0b795791f6fa6554c8fe528d1edf7839, type: 3}
+  - {fileID: 8300000, guid: a8680a6aca84fb444abb02689992b0f2, type: 3}
+  - {fileID: 8300000, guid: f1e78ce5133237044ae3c26f9c9387f3, type: 3}
   breathLoopClip: {fileID: 8300000, guid: ed504d0d45d3abf4e9c8ccb946ee7e35, type: 3}
   footstepVolume: 0.5
   sprintVolumeBoost: 0.35
