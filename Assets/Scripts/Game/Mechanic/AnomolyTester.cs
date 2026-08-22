@@ -36,14 +36,15 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly03+1", "Watcher on the floor ABOVE - go to the atrium railing and look UP" },
         { "Anomoly03-1", "Watcher on the floor BELOW - look DOWN the atrium" },
         { "Anomoly04", "Room numbers turn to gibberish - check the green signs above classroom doors" },
-        { "Anomoly05", "A ghost follows your path a few metres back - turn around to catch it" },
+        { "Anomoly05", "Go near the big classroom windows - something approaches the glass from the other side" },
         { "Anomoly14", "Someone at the bottom of the east stairwell, facing the corner" },
-        { "Anomoly16", "The ceiling hangs just above jump reach - impossible to miss" },
+        { "Anomoly16", "The ceiling presses down to just above your head" },
         { "Anomoly23", "The clock runs backwards - wall between P.201 and P.202, watch the red hand" },
         { "Anomoly27", "Door P.203 sits crooked in its frame, with a gap at the edge" },
         { "Anomoly29", "Step into either lift - you will be swapped to the other one" },
         { "Anomoly07", "Classroom banner reads TPCS instead of APCS - above the chalkboard" },
         { "Anomoly06", "Someone in the wall mirror - toilet, above the sinks" },
+        { "Anomoly20", "Someone hangs from the ceiling of the lit classroom" },
     };
 
     private void Awake()

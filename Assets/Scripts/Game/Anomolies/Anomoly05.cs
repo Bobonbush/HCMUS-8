@@ -1,38 +1,54 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// A doppelganger follows right behind you the whole round. It walks in your
-// footsteps - literally: it follows the trail of positions you walked through,
-// a couple of metres back - so spinning around catches it standing there.
+// Walking up to the glass, a figure appears outside and slowly advances toward
+// the window - the player watches it come closer through the "reflection".
+// It never gets through; it just keeps arriving.
 public class Anomoly05 : MonoBehaviour, Anomoly
 {
 
-    [Tooltip("The follower (the ghost). Hidden until Evaluate.")]
+    [Tooltip("The zombie figure. Hidden until the player is near a window.")]
     public ShadowFigure figure;
 
-    [Tooltip("How far behind along your own path it follows, in metres.")]
-    public float followDistance = 2.6f;
+    [Tooltip("Window panes that can show the approaching figure.")]
+    public List<Transform> windowZones = new List<Transform>();
 
-    [Tooltip("Its movement speed. Slightly above player sprint speed so it never falls behind.")]
-    public float moveSpeed = 6.5f;
+    [Tooltip("Player-to-window distance that makes the figure appear outside.")]
+    public float triggerDistance = 5f;
+
+    [Tooltip("Distance at which everything resets (hysteresis).")]
+    public float releaseDistance = 7.5f;
+
+    [Tooltip("How far beyond the glass the figure starts.")]
+    public float spawnDistance = 7f;
+
+    [Tooltip("How close to the glass it gets before stopping.")]
+    public float stopDistance = 0.7f;
+
+    [Tooltip("Approach speed in metres per second. Slow reads scarier.")]
+    public float approachSpeed = 0.85f;
+
+    [Tooltip("Degrees of drunken sway while it walks.")]
+    public float swayDegrees = 5f;
 
     Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
 
     private bool active;
-    private readonly List<Vector3> trail = new List<Vector3>();
-    private const float SampleSpacing = 0.3f;
-    private const int MaxSamples = 64;
+    private bool shown;
+    private Transform currentWindow;
+    private Vector3 outward;
 
     public void Evaluate()
     {
         active = true;
-        trail.Clear();
+        shown = false;
     }
 
     public void Restore()
     {
         active = false;
-        trail.Clear();
+        shown = false;
+        currentWindow = null;
         if (figure != null) figure.Show(false);
     }
 
@@ -42,47 +58,63 @@ public class Anomoly05 : MonoBehaviour, Anomoly
         Transform player = GameManager.Instance.GetPlayerTransform();
         if (player == null) return;
 
-        // Only haunt a player on this floor (the host sits under the floor root).
         float floorY = transform.parent != null ? transform.parent.position.y : transform.position.y;
-        if (Mathf.Abs(player.position.y - floorY) > 3f)
-        {
-            if (figure.gameObject.activeSelf) figure.Show(false);
-            trail.Clear();
-            return;
-        }
+        if (Mathf.Abs(player.position.y - floorY) > 3f) { Hide(); return; }
 
-        // Record the player's path.
-        if (trail.Count == 0 || (player.position - trail[trail.Count - 1]).sqrMagnitude > SampleSpacing * SampleSpacing)
+        // Nearest window to the player.
+        Transform nearest = null;
+        float nearestDistance = float.MaxValue;
+        foreach (Transform zone in windowZones)
         {
-            trail.Add(player.position);
-            if (trail.Count > MaxSamples) trail.RemoveAt(0);
+            if (zone == null) continue;
+            float d = Vector3.Distance(player.position, zone.position);
+            if (d < nearestDistance) { nearestDistance = d; nearest = zone; }
         }
+        if (nearest == null) return;
 
-        // Find the point on the trail followDistance behind the player (walking backwards).
-        Vector3 target = trail[0];
-        float distance = 0f;
-        Vector3 previous = player.position;
-        for (int i = trail.Count - 1; i >= 0; i--)
+        if (!shown && nearestDistance < triggerDistance)
         {
-            distance += Vector3.Distance(previous, trail[i]);
-            previous = trail[i];
-            if (distance >= followDistance) { target = trail[i]; break; }
-        }
-
-        // Until you have walked far enough there is nothing to stand on - stay hidden.
-        if (distance < followDistance)
-        {
-            if (figure.gameObject.activeSelf) figure.Show(false);
-            return;
-        }
-
-        if (!figure.gameObject.activeSelf)
-        {
-            figure.transform.position = target;
+            shown = true;
+            currentWindow = nearest;
+            // Outward = from the floor interior toward the window, flattened.
+            Vector3 interior = (transform.parent != null ? transform.parent.position : transform.position)
+                             + new Vector3(19f, 0f, -15f);   // rough centre of the floor plan
+            outward = currentWindow.position - interior;
+            outward.y = 0f;
+            outward.Normalize();
+            Vector3 spawn = currentWindow.position + outward * spawnDistance;
+            spawn.y = floorY;
+            figure.transform.position = spawn;
+            figure.facePlayer = false;   // it walks its own line, it does not track you
+            figure.transform.rotation = Quaternion.LookRotation(-outward);
             figure.Show(true);
         }
-        figure.transform.position = Vector3.MoveTowards(figure.transform.position, target, moveSpeed * Time.deltaTime);
-        figure.facePlayer = true;   // it is always looking at you
+        else if (shown && nearestDistance > releaseDistance)
+        {
+            Hide();
+            return;
+        }
+
+        if (shown && currentWindow != null)
+        {
+            Vector3 target = currentWindow.position + outward * stopDistance;
+            target.y = floorY;
+            Vector3 pos = Vector3.MoveTowards(figure.transform.position, target, approachSpeed * Time.deltaTime);
+            figure.transform.position = pos;
+            // slow drunken sway sells the walk on a static mesh
+            float sway = Mathf.Sin(Time.time * 1.7f) * swayDegrees;
+            figure.transform.rotation = Quaternion.LookRotation(-outward) * Quaternion.Euler(0f, 0f, sway);
+        }
+    }
+
+    private void Hide()
+    {
+        if (shown || (figure != null && figure.gameObject.activeSelf))
+        {
+            shown = false;
+            currentWindow = null;
+            if (figure != null) figure.Show(false);
+        }
     }
 
     public Anomoly.EvaluateType getType()

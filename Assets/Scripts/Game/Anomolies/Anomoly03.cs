@@ -30,7 +30,8 @@ public class Anomoly03 : MonoBehaviour, Anomoly
 
         figure.transform.position = anchor.position;
         figure.transform.rotation = anchor.rotation;
-        figure.facePlayer = true;
+        // Fixed stance facing the anchor's direction - it does not track the player.
+        figure.facePlayer = false;
         figure.Show(true);
     }
 
