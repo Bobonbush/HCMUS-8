@@ -4,9 +4,14 @@ using UnityEngine;
 /// Footstep, landing and breathing audio for the first person controller.
 ///
 /// The clips are synthesised at startup so this works in a project with no audio assets:
-/// a footstep is a short noise burst through a resonant low-pass plus a low sine thump,
-/// which is what gives the "heel hitting the floor" transient. Drop your own clips into
-/// the arrays below and those are used instead.
+/// a footstep is a bright heel tap plus a delayed toe tap and a soft scuff tail, tuned
+/// to read as soft-soled shoes on school tile rather than boots on wood. Drop your own
+/// clips into the arrays below and those are used instead.
+///
+/// Breathing is a single seamless inhale/exhale loop on its own AudioSource. It stays
+/// completely silent while walking; sprinting builds exertion (from FirstPersonCameraFeel)
+/// and past a threshold the loop fades in, speeding up the more tired you are, then fades
+/// back out as you recover. No more per-breath one-shots.
 /// </summary>
 [RequireComponent(typeof(AudioSource))]
 [AddComponentMenu("Player/First Person Footsteps")]
@@ -22,15 +27,17 @@ public class FirstPersonFootsteps : MonoBehaviour
     public AudioClip[] footstepClips;
     [Tooltip("Leave empty to use the synthesised landing sounds.")]
     public AudioClip[] landingClips;
+    [Tooltip("Leave empty to use the synthesised breathing loop.")]
+    public AudioClip breathLoopClip;
 
     [Header("Footsteps")]
-    [Range(0f, 1f)] public float footstepVolume = 0.5f;
+    [Range(0f, 1f)] public float footstepVolume = 0.42f;
     [Tooltip("Extra volume at full sprint, on top of the base volume.")]
-    [Range(0f, 1f)] public float sprintVolumeBoost = 0.35f;
+    [Range(0f, 1f)] public float sprintVolumeBoost = 0.3f;
     [Tooltip("Random pitch variation. Identical footsteps are the giveaway that it is a game.")]
-    [Range(0f, 0.3f)] public float pitchVariation = 0.07f;
+    [Range(0f, 0.3f)] public float pitchVariation = 0.06f;
     [Tooltip("Sprint footsteps are pitched down slightly so they land heavier.")]
-    [Range(0f, 0.3f)] public float sprintPitchDrop = 0.08f;
+    [Range(0f, 0.3f)] public float sprintPitchDrop = 0.07f;
     [Tooltip("How far left/right each foot is panned.")]
     [Range(0f, 1f)] public float footPan = 0.22f;
 
@@ -43,28 +50,29 @@ public class FirstPersonFootsteps : MonoBehaviour
 
     [Header("Breathing")]
     public bool breathingEnabled = true;
-    [Range(0f, 1f)] public float breathVolume = 0.32f;
-    [Tooltip("Breathing is silent below this exertion, then fades in.")]
-    [Range(0f, 1f)] public float breathThreshold = 0.12f;
-    [Tooltip("Seconds between breaths when fully out of breath.")]
-    public float breathIntervalExhausted = 0.85f;
-    [Tooltip("Seconds between breaths at the exertion threshold.")]
-    public float breathIntervalRested = 2.6f;
+    [Tooltip("Volume of the breathing loop when fully out of breath.")]
+    [Range(0f, 1f)] public float breathVolume = 0.4f;
+    [Tooltip("Exertion (0..1, built by sprinting) above which breathing fades in.")]
+    [Range(0f, 1f)] public float breathThreshold = 0.35f;
+    [Tooltip("Once audible, breathing keeps playing until exertion drops below threshold times this. Stops the sound popping in and out around the threshold.")]
+    [Range(0f, 1f)] public float breathHysteresis = 0.55f;
+    [Tooltip("Seconds for the breathing to fade in once past the threshold.")]
+    public float breathFadeIn = 1.6f;
+    [Tooltip("Seconds for the breathing to fade out while recovering.")]
+    public float breathFadeOut = 3.0f;
 
     // ---------------------------------------------------------------- private
 
-    AudioSource _source;
+    AudioSource _source;          // one-shots: steps and landings
+    AudioSource _breathSource;    // dedicated looping source for breathing
     AudioClip[] _steps;
     AudioClip[] _lands;
-    AudioClip[] _breathsIn;
-    AudioClip[] _breathsOut;
     int _lastStepIndex = -1;
-    float _breathTimer;
-    bool _breathInhale = true;
+    bool _breathAudible;
+    float _breathLevel;           // 0..1 smoothed fade
 
     const int StepVariations = 6;
     const int LandVariations = 3;
-    const int BreathVariations = 3;
 
     void Awake()
     {
@@ -83,7 +91,17 @@ public class FirstPersonFootsteps : MonoBehaviour
 
         _steps = footstepClips != null && footstepClips.Length > 0 ? footstepClips : BuildFootsteps();
         _lands = landingClips != null && landingClips.Length > 0 ? landingClips : BuildLandings();
-        if (breathingEnabled) BuildBreaths();
+
+        if (breathingEnabled)
+        {
+            _breathSource = gameObject.AddComponent<AudioSource>();
+            _breathSource.playOnAwake = false;
+            _breathSource.loop = true;
+            _breathSource.spatialBlend = 0f;
+            _breathSource.volume = 0f;
+            _breathSource.outputAudioMixerGroup = _source.outputAudioMixerGroup;
+            _breathSource.clip = breathLoopClip != null ? breathLoopClip : BuildBreathLoop();
+        }
     }
 
     void OnEnable()
@@ -102,28 +120,29 @@ public class FirstPersonFootsteps : MonoBehaviour
 
     void Update()
     {
-        if (!breathingEnabled || cameraFeel == null || _breathsIn == null) return;
+        if (!breathingEnabled || _breathSource == null || cameraFeel == null) return;
 
         float exertion = cameraFeel.Exertion;
-        if (exertion < breathThreshold)
-        {
-            _breathTimer = 0f;
-            return;
-        }
 
-        float t = Mathf.InverseLerp(breathThreshold, 1f, exertion);
-        _breathTimer -= Time.deltaTime;
-        if (_breathTimer > 0f) return;
+        // Hysteresis: fade in above the threshold, but once audible keep going until
+        // exertion has genuinely recovered, so the loop does not stutter at the edge.
+        if (!_breathAudible && exertion >= breathThreshold) _breathAudible = true;
+        else if (_breathAudible && exertion < breathThreshold * breathHysteresis) _breathAudible = false;
 
-        // Inhale and exhale alternate, so the interval is half a breath cycle.
-        _breathTimer = Mathf.Lerp(breathIntervalRested, breathIntervalExhausted, t) * 0.5f;
+        float dt = Time.deltaTime;
+        float target = _breathAudible ? 1f : 0f;
+        float tau = _breathAudible ? Mathf.Max(0.05f, breathFadeIn) : Mathf.Max(0.05f, breathFadeOut);
+        // Reaches ~95% of the target in `tau` seconds.
+        _breathLevel = Mathf.Lerp(_breathLevel, target, 1f - Mathf.Exp(-3f * dt / tau));
 
-        AudioClip[] bank = _breathInhale ? _breathsIn : _breathsOut;
-        _breathInhale = !_breathInhale;
+        // How hard the breathing is once audible: 0 right at the threshold, 1 exhausted.
+        float depth = Mathf.InverseLerp(breathThreshold * breathHysteresis, 1f, exertion);
 
-        _source.panStereo = 0f;
-        _source.pitch = Random.Range(0.94f, 1.06f);
-        _source.PlayOneShot(bank[Random.Range(0, bank.Length)], breathVolume * Mathf.Lerp(0.35f, 1f, t));
+        // The recording is left at its natural pitch - only volume responds to exertion.
+        _breathSource.volume = breathVolume * _breathLevel * Mathf.Lerp(0.5f, 1f, depth);
+
+        if (_breathLevel > 0.005f && !_breathSource.isPlaying) _breathSource.Play();
+        else if (_breathLevel <= 0.005f && _breathSource.isPlaying) _breathSource.Stop();
     }
 
     // ---------------------------------------------------------------- playback
@@ -164,17 +183,15 @@ public class FirstPersonFootsteps : MonoBehaviour
         for (int i = 0; i < StepVariations; i++)
         {
             float t = StepVariations == 1 ? 0.5f : i / (float)(StepVariations - 1);
-            clips[i] = SynthesiseImpact(
+            clips[i] = SynthesiseShoeStep(
                 name: "ProcFootstep" + i,
                 seed: 4400 + i * 97,
-                duration: Mathf.Lerp(0.19f, 0.26f, t),
-                noiseDecay: Mathf.Lerp(34f, 26f, t),
-                cutoffHz: Mathf.Lerp(2600f, 1500f, t),
-                resonance: 1.5f,
-                thumpHz: Mathf.Lerp(96f, 68f, t),
-                thumpDecay: 34f,
-                thumpAmount: 0.5f,
-                clickAmount: 0.35f);
+                duration: Mathf.Lerp(0.16f, 0.21f, t),
+                heelHz: Mathf.Lerp(2400f, 1700f, t),
+                toeDelay: Mathf.Lerp(0.052f, 0.075f, t),
+                thumpHz: Mathf.Lerp(130f, 100f, t),
+                thumpAmount: 0.16f,
+                scuffAmount: 0.3f);
         }
         return clips;
     }
@@ -185,65 +202,73 @@ public class FirstPersonFootsteps : MonoBehaviour
         for (int i = 0; i < LandVariations; i++)
         {
             float t = LandVariations == 1 ? 0.5f : i / (float)(LandVariations - 1);
-            clips[i] = SynthesiseImpact(
+            clips[i] = SynthesiseShoeStep(
                 name: "ProcLanding" + i,
                 seed: 9100 + i * 131,
-                duration: Mathf.Lerp(0.36f, 0.44f, t),
-                noiseDecay: Mathf.Lerp(18f, 14f, t),
-                cutoffHz: Mathf.Lerp(1300f, 900f, t),
-                resonance: 1.3f,
-                thumpHz: Mathf.Lerp(62f, 48f, t),
-                thumpDecay: 17f,
-                thumpAmount: 1.0f,
-                clickAmount: 0.25f);
+                duration: Mathf.Lerp(0.34f, 0.42f, t),
+                heelHz: Mathf.Lerp(1400f, 1000f, t),
+                toeDelay: 0.03f,
+                thumpHz: Mathf.Lerp(64f, 50f, t),
+                thumpAmount: 0.95f,
+                scuffAmount: 0.55f);
         }
         return clips;
     }
 
-    void BuildBreaths()
-    {
-        _breathsIn = new AudioClip[BreathVariations];
-        _breathsOut = new AudioClip[BreathVariations];
-        for (int i = 0; i < BreathVariations; i++)
-        {
-            _breathsIn[i] = SynthesiseBreath("ProcInhale" + i, 1700 + i * 53, 0.62f, 900f, 2200f, 0.42f);
-            _breathsOut[i] = SynthesiseBreath("ProcExhale" + i, 3100 + i * 71, 0.78f, 600f, 1200f, 0.62f);
-        }
-    }
-
     /// <summary>
-    /// A percussive impact: noise through a resonant low-pass for the "scuff", a decaying
-    /// sine for the "thud", and a very short bright click for the initial heel contact.
+    /// A shoe step on hard tile: a bright, very short heel tap; a quieter toe tap a few
+    /// tens of milliseconds later (real steps are two contacts, and the double transient
+    /// is most of what reads as "shoe"); a small low thump; and a soft scuff tail.
     /// </summary>
-    AudioClip SynthesiseImpact(string name, int seed, float duration, float noiseDecay,
-        float cutoffHz, float resonance, float thumpHz, float thumpDecay,
-        float thumpAmount, float clickAmount)
+    AudioClip SynthesiseShoeStep(string name, int seed, float duration, float heelHz,
+        float toeDelay, float thumpHz, float thumpAmount, float scuffAmount)
     {
         int rate = SampleRate;
         int count = Mathf.Max(16, Mathf.CeilToInt(duration * rate));
         var data = new float[count];
         var rng = new System.Random(seed);
 
-        // State variable filter coefficients.
-        float f = 2f * Mathf.Sin(Mathf.PI * Mathf.Clamp(cutoffHz, 20f, rate * 0.45f) / rate);
-        float q = 1f / Mathf.Max(0.5f, resonance);
-        float low = 0f, band = 0f;
+        // Two resonators (state-variable band-pass) — heel bright, toe slightly brighter.
+        float fHeel = 2f * Mathf.Sin(Mathf.PI * Mathf.Clamp(heelHz, 20f, rate * 0.45f) / rate);
+        float fToe = 2f * Mathf.Sin(Mathf.PI * Mathf.Clamp(heelHz * 1.3f, 20f, rate * 0.45f) / rate);
+        float fScuff = 2f * Mathf.Sin(Mathf.PI * Mathf.Clamp(1500f, 20f, rate * 0.45f) / rate);
+        const float qRes = 0.9f;   // resonant taps
+        const float qScuff = 1.6f; // broad scuff
+        float lowH = 0f, bandH = 0f, lowT = 0f, bandT = 0f, lowS = 0f, bandS = 0f;
 
+        int toeStart = Mathf.RoundToInt(toeDelay * rate);
         float peak = 0f;
+
         for (int i = 0; i < count; i++)
         {
             float t = i / (float)rate;
             float noise = (float)(rng.NextDouble() * 2.0 - 1.0);
 
-            float high = noise - low - q * band;
-            band += f * high;
-            low += f * band;
+            // Heel: excite the resonator with a burst only in the first ~8ms.
+            float heelExcite = t < 0.008f ? noise : 0f;
+            float hiH = heelExcite - lowH - qRes * bandH;
+            bandH += fHeel * hiH;
+            lowH += fHeel * bandH;
+            float heel = bandH * Mathf.Exp(-t * 90f);
 
-            float envelope = Mathf.Exp(-t * noiseDecay);
-            float click = clickAmount * high * Mathf.Exp(-t * 260f);
-            float thump = thumpAmount * Mathf.Sin(2f * Mathf.PI * thumpHz * t) * Mathf.Exp(-t * thumpDecay);
+            // Toe: a second, quieter burst starting at toeDelay.
+            float tt = (i - toeStart) / (float)rate;
+            float toeExcite = (tt >= 0f && tt < 0.006f) ? noise : 0f;
+            float hiT = toeExcite - lowT - qRes * bandT;
+            bandT += fToe * hiT;
+            lowT += fToe * bandT;
+            float toe = tt >= 0f ? bandT * Mathf.Exp(-tt * 110f) * 0.55f : 0f;
 
-            float sample = low * envelope + click + thump;
+            // Scuff: continuous quiet noise through a broad band, fading over the clip.
+            float hiS = noise - lowS - qScuff * bandS;
+            bandS += fScuff * hiS;
+            lowS += fScuff * bandS;
+            float scuff = bandS * scuffAmount * 0.35f * Mathf.Exp(-t * 22f);
+
+            // Thump: small low sine so the step has body without booming.
+            float thump = thumpAmount * Mathf.Sin(2f * Mathf.PI * thumpHz * t) * Mathf.Exp(-t * 40f);
+
+            float sample = heel + toe + scuff + thump;
             data[i] = sample;
             peak = Mathf.Max(peak, Mathf.Abs(sample));
         }
@@ -252,48 +277,62 @@ public class FirstPersonFootsteps : MonoBehaviour
         return ToClip(name, data, rate);
     }
 
-    /// <summary>Band-passed noise with a slow swell: reads as air moving, not as static.</summary>
-    AudioClip SynthesiseBreath(string name, int seed, float duration, float lowCutHz, float highCutHz, float attackFraction)
+    /// <summary>
+    /// One seamless breath cycle: inhale (brighter, faster swell), short pause, exhale
+    /// (darker, longer), pause. The loop starts and ends in silence so it cannot click.
+    /// </summary>
+    AudioClip BuildBreathLoop()
     {
         int rate = SampleRate;
-        int count = Mathf.Max(16, Mathf.CeilToInt(duration * rate));
+        const float cycleSeconds = 3.4f;
+        int count = Mathf.CeilToInt(cycleSeconds * rate);
         var data = new float[count];
-        var rng = new System.Random(seed);
+        var rng = new System.Random(2470);
 
-        float fHigh = 2f * Mathf.Sin(Mathf.PI * Mathf.Clamp(highCutHz, 20f, rate * 0.45f) / rate);
-        float fLow = 2f * Mathf.Sin(Mathf.PI * Mathf.Clamp(lowCutHz, 20f, rate * 0.45f) / rate);
-        const float q = 1.4f;
-        float lowA = 0f, bandA = 0f, lowB = 0f, bandB = 0f;
+        // Cycle layout, as fractions: inhale 0.00-0.34, pause to 0.42, exhale 0.42-0.92, pause to 1.
+        const float inEnd = 0.34f, exStart = 0.42f, exEnd = 0.92f;
 
-        int attackSamples = Mathf.Max(1, Mathf.RoundToInt(count * Mathf.Clamp01(attackFraction)));
+        // Two formant-ish band-passes shape the airflow; inhale sits higher than exhale.
+        float fIn = 2f * Mathf.Sin(Mathf.PI * 1350f / rate);
+        float fEx = 2f * Mathf.Sin(Mathf.PI * 650f / rate);
+        float fBody = 2f * Mathf.Sin(Mathf.PI * 320f / rate);
+        const float q = 1.1f;
+        float lowI = 0f, bandI = 0f, lowE = 0f, bandE = 0f, lowB = 0f, bandB = 0f;
+
         float peak = 0f;
-
         for (int i = 0; i < count; i++)
         {
+            float u = i / (float)count;
             float noise = (float)(rng.NextDouble() * 2.0 - 1.0);
 
-            float highA = noise - lowA - q * bandA;
-            bandA += fHigh * highA;
-            lowA += fHigh * bandA;
+            float hiI = noise - lowI - q * bandI;
+            bandI += fIn * hiI;
+            lowI += fIn * bandI;
 
-            // Subtracting a second, lower low-pass leaves a band: the vocal-tract-ish part.
-            float highB = lowA - lowB - q * bandB;
-            bandB += fLow * highB;
-            lowB += fLow * bandB;
+            float hiE = noise - lowE - q * bandE;
+            bandE += fEx * hiE;
+            lowE += fEx * bandE;
 
-            float banded = lowA - lowB;
+            float hiB = noise - lowB - q * bandB;
+            bandB += fBody * hiB;
+            lowB += fBody * bandB;
 
-            float envelope = i < attackSamples
-                ? Mathf.Sin(Mathf.PI * 0.5f * (i / (float)attackSamples))
-                : Mathf.Cos(Mathf.PI * 0.5f * ((i - attackSamples) / (float)Mathf.Max(1, count - attackSamples)));
+            // Smooth half-sine envelopes; both ends of each phase are zero.
+            float envIn = 0f, envEx = 0f;
+            if (u < inEnd)
+                envIn = Mathf.Sin(Mathf.PI * (u / inEnd));
+            else if (u >= exStart && u < exEnd)
+                envEx = Mathf.Sin(Mathf.PI * ((u - exStart) / (exEnd - exStart)));
 
-            float sample = banded * envelope * envelope;
+            // Exhale is slightly louder and carries more low body, like real tired breathing.
+            float sample = bandI * envIn * envIn * 0.9f
+                         + (bandE + bandB * 0.5f) * envEx * envEx * 1.1f;
             data[i] = sample;
             peak = Mathf.Max(peak, Mathf.Abs(sample));
         }
 
         Normalise(data, peak, rate);
-        return ToClip(name, data, rate);
+        return ToClip("ProcBreathLoop", data, rate);
     }
 
     static int SampleRate
