@@ -14746,6 +14746,7 @@ Transform:
   - {fileID: 8281231015462795388}
   - {fileID: 347449087776365744}
   - {fileID: 690136846552531921}
+  - {fileID: 3584478863485633458}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5695585007023708284
@@ -14767,6 +14768,7 @@ MonoBehaviour:
   - {fileID: 4123506625010238415}
   - {fileID: 2764614940625271759}
   - {fileID: 5786651363452001106}
+  - {fileID: 2162334646148192255}
 --- !u!1 &4916251915851548037
 GameObject:
   m_ObjectHideFlags: 0
@@ -29443,6 +29445,64 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &9192534215926010988
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3584478863485633458}
+  - component: {fileID: 2162334646148192255}
+  m_Layer: 0
+  m_Name: Anomoly#16
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3584478863485633458
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9192534215926010988}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.25, y: 4.32, z: -12.53}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6269620153155448819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2162334646148192255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9192534215926010988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e658bc64535e194ca3c410db3f22a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anomoly16
+  ceilingParts:
+  - {fileID: 6274931158445722881}
+  - {fileID: 4570542422728938739}
+  - {fileID: 4753989500061117113}
+  - {fileID: 4300321817121565256}
+  - {fileID: 4768589138948934763}
+  - {fileID: 6679553221205466953}
+  - {fileID: 9212227589197390524}
+  - {fileID: 3122867635270057305}
+  - {fileID: 5058705312402416526}
+  - {fileID: 7235065256967419231}
+  - {fileID: 8022889006881370100}
+  - {fileID: 8015012855905748861}
+  lowerBy: 0.35
 --- !u!1 &9216525521348728173
 GameObject:
   m_ObjectHideFlags: 0
