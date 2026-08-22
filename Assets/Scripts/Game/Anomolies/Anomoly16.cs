@@ -1,21 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// The ceiling hangs just above the player's head - almost touching. Slabs and
-// lights drop to fixed target heights (the lights sit just under the slabs).
-// Colliders on the moved parts are switched off while active so the stairs stay
-// walkable and nothing can trap the player.
+// The ceiling hangs far lower than it should. A set of solid box slabs (prebuilt,
+// hidden) appears at the low height and the light fixtures drop just beneath them.
+// Boxes are real geometry with thickness, visible from below and colliding, so the
+// player can neither see through nor jump through the false ceiling.
 public class Anomoly16 : MonoBehaviour, Anomoly
 {
 
-    [Tooltip("Ceiling slabs and ceiling-mounted lights, wired by the setup tooling.")]
-    public List<Transform> ceilingParts = new List<Transform>();
+    [Tooltip("The false low-ceiling slabs, prebuilt and disabled by the setup tooling.")]
+    public List<GameObject> ceilingBoxes = new List<GameObject>();
 
-    [Tooltip("Target local height for the ceiling slabs. Player head is at ~1.8.")]
-    public float slabHeight = 2.25f;
+    [Tooltip("Ceiling-mounted light fixtures that drop with the false ceiling.")]
+    public List<Transform> lights = new List<Transform>();
 
-    [Tooltip("Target local height for the light fixtures, just below the slabs.")]
-    public float lightHeight = 2.05f;
+    [Tooltip("Target local height for the dropped light fixtures, just below the boxes.")]
+    public float lightHeight = 2.9f;
 
     Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
 
@@ -24,31 +24,31 @@ public class Anomoly16 : MonoBehaviour, Anomoly
     public void Evaluate()
     {
         if (originals.Count > 0) return;   // already evaluated, do not stack
-        foreach (Transform part in ceilingParts)
+        foreach (GameObject box in ceilingBoxes)
         {
-            if (part == null) { originals.Add(Vector3.zero); continue; }
-            originals.Add(part.localPosition);
-            Vector3 p = part.localPosition;
-            p.y = part.GetComponent<Light>() != null ? lightHeight : slabHeight;
-            part.localPosition = p;
-            SetColliders(part, false);
+            if (box != null) box.SetActive(true);
+        }
+        foreach (Transform light in lights)
+        {
+            if (light == null) { originals.Add(Vector3.zero); continue; }
+            originals.Add(light.localPosition);
+            Vector3 p = light.localPosition;
+            p.y = lightHeight;
+            light.localPosition = p;
         }
     }
 
     public void Restore()
     {
-        for (int i = 0; i < ceilingParts.Count && i < originals.Count; i++)
+        foreach (GameObject box in ceilingBoxes)
         {
-            if (ceilingParts[i] == null) continue;
-            ceilingParts[i].localPosition = originals[i];
-            SetColliders(ceilingParts[i], true);
+            if (box != null) box.SetActive(false);
+        }
+        for (int i = 0; i < lights.Count && i < originals.Count; i++)
+        {
+            if (lights[i] != null) lights[i].localPosition = originals[i];
         }
         originals.Clear();
-    }
-
-    private static void SetColliders(Transform part, bool on)
-    {
-        foreach (Collider c in part.GetComponentsInChildren<Collider>()) c.enabled = on;
     }
 
     public Anomoly.EvaluateType getType()
