@@ -131,6 +131,12 @@ public class GameManager : MonoBehaviour
         MaintainInfinity();
     }
 
+    // For anomolies that need to know where the player is (looker, doppelganger, lift swap...)
+    public Transform GetPlayerTransform()
+    {
+        return playerTransform;
+    }
+
     // For global settings
     public void ForceAnomolyAll(int anomoly_index)
     {
