@@ -34,10 +34,6 @@ public class FirstPersonFootsteps : MonoBehaviour
     [Range(0f, 1f)] public float footstepVolume = 0.42f;
     [Tooltip("Extra volume at full sprint, on top of the base volume.")]
     [Range(0f, 1f)] public float sprintVolumeBoost = 0.3f;
-    [Tooltip("Random pitch variation. Identical footsteps are the giveaway that it is a game.")]
-    [Range(0f, 0.3f)] public float pitchVariation = 0.06f;
-    [Tooltip("Sprint footsteps are pitched down slightly so they land heavier.")]
-    [Range(0f, 0.3f)] public float sprintPitchDrop = 0.07f;
     [Tooltip("How far left/right each foot is panned.")]
     [Range(0f, 1f)] public float footPan = 0.22f;
 
@@ -155,8 +151,10 @@ public class FirstPersonFootsteps : MonoBehaviour
         if (_steps.Length > 1 && index == _lastStepIndex) index = (index + 1) % _steps.Length;
         _lastStepIndex = index;
 
+        // Clips play at their natural pitch - variety comes from the different slices,
+        // never from pitch shifting.
         _source.panStereo = foot == FirstPersonController.Foot.Left ? -footPan : footPan;
-        _source.pitch = 1f + Random.Range(-pitchVariation, pitchVariation) - sprintPitchDrop * intensity;
+        _source.pitch = 1f;
 
         float volume = footstepVolume + sprintVolumeBoost * intensity;
         _source.PlayOneShot(_steps[index], Mathf.Clamp01(volume));
@@ -170,7 +168,7 @@ public class FirstPersonFootsteps : MonoBehaviour
         float strength = Mathf.Clamp01(Mathf.InverseLerp(minLandImpactSpeed, landFullImpactSpeed, impactSpeed));
 
         _source.panStereo = 0f;
-        _source.pitch = 1f - 0.12f * strength + Random.Range(-0.04f, 0.04f);
+        _source.pitch = 1f;
         _source.PlayOneShot(_lands[Random.Range(0, _lands.Length)],
             Mathf.Clamp01(landingVolume * Mathf.Lerp(0.35f, 1f, strength)));
     }
