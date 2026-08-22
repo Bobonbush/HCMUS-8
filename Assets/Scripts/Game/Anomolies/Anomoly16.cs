@@ -10,8 +10,8 @@ public class Anomoly16 : MonoBehaviour, Anomoly
     [Tooltip("Ceiling slabs and ceiling-mounted lights, wired by the setup tooling.")]
     public List<Transform> ceilingParts = new List<Transform>();
 
-    [Tooltip("How far the ceiling drops, in metres. Keep it subtle.")]
-    public float lowerBy = 0.35f;
+    [Tooltip("How far the ceiling drops, in metres.")]
+    public float lowerBy = 0.6f;
 
     Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
 

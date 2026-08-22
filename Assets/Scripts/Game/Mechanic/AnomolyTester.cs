@@ -4,19 +4,21 @@ using UnityEngine.InputSystem;
 
 // Debug tool: step through every anomoly in order while playing.
 //
-//   N - restore everything, then evaluate the NEXT anomoly on the player's floor
-//   B - same, but backwards
-//   R - restore everything (back to a clean floor)
+//   F1 - toggle the tester on/off (off = no hotkeys, no overlay)
+//   N  - restore everything, then evaluate the NEXT anomoly on the player's floor
+//   B  - same, but backwards
+//   R  - restore everything (back to a clean floor)
 //
 // The current anomoly and a hint about where to look are drawn on screen.
 // Anomoly03 (AddUp) gets two steps: watcher above, then watcher below.
-// Delete this object from the scene (or untick Enabled) for real builds.
+// Delete this object from the scene (or untick Start Enabled) for real builds.
 public class AnomolyTester : MonoBehaviour
 {
 
-    [Tooltip("Master switch so the tool can stay in the scene but do nothing.")]
-    public bool hotkeysEnabled = true;
+    [Tooltip("Whether the tester starts active. F1 toggles it at runtime either way.")]
+    public bool startEnabled = true;
 
+    private bool active;
     private int step = -1;          // -1 = clean floor, nothing evaluated
     private string status = "";
 
@@ -29,26 +31,38 @@ public class AnomolyTester : MonoBehaviour
 
     private static readonly Dictionary<string, string> Hints = new Dictionary<string, string>
     {
-        { "Anomoly01", "Den nhap nhay - nhin cac den hanh lang (cho ~3s)" },
-        { "Anomoly02", "Toan bo den se tat - cho 5-10s" },
-        { "Anomoly03+1", "Nguoi tang TREN nhin xuong - ra gieng troi, nhin LEN" },
-        { "Anomoly03-1", "Nguoi tang DUOI - ra gieng troi, nhin XUONG" },
-        { "Anomoly04", "So phong thanh gibberish - nhin bang xanh tren cua lop" },
-        { "Anomoly05", "Doppelganger - lai gan cua kinh lon roi quay dau lai" },
-        { "Anomoly14", "Ke nup - di het hanh lang ve phia cau thang cuoi" },
-        { "Anomoly16", "Tran nha thap hon 35cm - de y den tran va mep tuong" },
-        { "Anomoly23", "Dong ho chay nguoc - tuong giua P.201 va P.202" },
-        { "Anomoly27", "Cua P.203 lech va nghieng, ho khe o mep" },
-        { "Anomoly29", "Buoc vao bat ky thang may nao - se bi doi sang thang ben kia" },
-        { "Anomoly07", "Banner lop hoc: APCS -> TPCS (2 lop chi tiet, tren bang)" },
-        { "Anomoly06", "Guong dung trong phong toilet phia trong - co nguoi trong guong" },
+        { "Anomoly01", "A corridor light flickers - watch the ceiling lights (takes ~3s)" },
+        { "Anomoly02", "All lights go out - wait 5-10s" },
+        { "Anomoly03+1", "Watcher on the floor ABOVE - go to the atrium railing and look UP" },
+        { "Anomoly03-1", "Watcher on the floor BELOW - look DOWN the atrium" },
+        { "Anomoly04", "Room numbers turn to gibberish - check the green signs above classroom doors" },
+        { "Anomoly05", "Doppelganger - walk close to the big windows, then turn around" },
+        { "Anomoly14", "Someone hiding - walk to the very end of the east corridor, past the stairs" },
+        { "Anomoly16", "The ceiling is 60cm lower - check the ceiling lights and wall edges" },
+        { "Anomoly23", "The clock runs backwards - wall between P.201 and P.202, watch the red hand" },
+        { "Anomoly27", "Door P.203 sits crooked in its frame, with a gap at the edge" },
+        { "Anomoly29", "Step into either lift - you will be swapped to the other one" },
+        { "Anomoly07", "Classroom banner reads TPCS instead of APCS - above the chalkboard" },
+        { "Anomoly06", "Someone in the wall mirror - toilet, above the sinks" },
     };
+
+    private void Awake()
+    {
+        active = startEnabled;
+    }
 
     private void Update()
     {
-        if (!hotkeysEnabled) return;
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
+
+        if (kb.f1Key.wasPressedThisFrame)
+        {
+            active = !active;
+            if (!active) RestoreAll();
+            return;
+        }
+        if (!active) return;
 
         if (kb.nKey.wasPressedThisFrame) Next(+1);
         else if (kb.bKey.wasPressedThisFrame) Next(-1);
@@ -58,11 +72,11 @@ public class AnomolyTester : MonoBehaviour
     public void Next(int direction)
     {
         List<Step> steps = BuildSteps();
-        if (steps.Count == 0) { status = "khong tim thay AnomolyManager"; return; }
+        if (steps.Count == 0) { status = "no AnomolyManager found"; return; }
 
         step = ((step + direction) % (steps.Count + 1) + steps.Count + 1) % (steps.Count + 1);
         // step == steps.Count means the "clean floor" slot in the cycle
-        if (step == steps.Count) { RestoreAllInternal(); status = "(sach - khong co anomoly)"; return; }
+        if (step == steps.Count) { RestoreAllInternal(); status = "(clean floor - no anomoly, for comparison)"; return; }
 
         Apply(steps[step]);
     }
@@ -71,7 +85,7 @@ public class AnomolyTester : MonoBehaviour
     {
         RestoreAllInternal();
         step = -1;
-        status = "(da restore het)";
+        status = "(everything restored)";
     }
 
     private void Apply(Step s)
@@ -79,7 +93,7 @@ public class AnomolyTester : MonoBehaviour
         RestoreAllInternal();
 
         AnomolyManager mgr = FindPlayerFloorManager();
-        if (mgr == null) { status = "khong tim thay tang cua player"; return; }
+        if (mgr == null) { status = "player floor not found"; return; }
 
         if (s.addUpDirection != 0)
             GameManager.Instance.ForceAnomoly(s.addUpDirection, s.index);
@@ -89,7 +103,7 @@ public class AnomolyTester : MonoBehaviour
         string key = s.addUpDirection == 0 ? s.name : s.name + (s.addUpDirection > 0 ? "+1" : "-1");
         string hint;
         Hints.TryGetValue(key, out hint);
-        status = s.name + (s.addUpDirection > 0 ? " (tang tren)" : s.addUpDirection < 0 ? " (tang duoi)" : "")
+        status = s.name + (s.addUpDirection > 0 ? " (floor above)" : s.addUpDirection < 0 ? " (floor below)" : "")
                + "\n" + (hint ?? "");
     }
 
@@ -140,18 +154,18 @@ public class AnomolyTester : MonoBehaviour
 
     private void OnGUI()
     {
-        if (!hotkeysEnabled) return;
+        if (!active) return;
         List<Step> steps = BuildSteps();
         string header = step >= 0 && step < steps.Count
             ? "[" + (step + 1) + "/" + steps.Count + "] "
             : "";
-        string text = "ANOMOLY TESTER   N: tiep theo | B: lui | R: restore\n" + header + status;
+        string text = "ANOMOLY TESTER   N: next | B: back | R: restore | F1: hide\n" + header + status;
 
         GUIStyle style = new GUIStyle(GUI.skin.label) { fontSize = 16, richText = false };
         style.normal.textColor = Color.white;
         GUI.color = new Color(0f, 0f, 0f, 0.65f);
-        GUI.DrawTexture(new Rect(8, 8, 640, 70), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(8, 8, 660, 70), Texture2D.whiteTexture);
         GUI.color = Color.white;
-        GUI.Label(new Rect(16, 12, 630, 64), text, style);
+        GUI.Label(new Rect(16, 12, 650, 64), text, style);
     }
 }
