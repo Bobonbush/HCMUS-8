@@ -60,8 +60,6 @@ public class FirstPersonFootsteps : MonoBehaviour
     public float breathFadeIn = 1.6f;
     [Tooltip("Seconds for the breathing to fade out while recovering.")]
     public float breathFadeOut = 3.0f;
-    [Tooltip("Playback rate of the breath loop when fully exhausted. 1 is the rested rate, higher is faster panting.")]
-    [Range(1f, 2f)] public float breathRateExhausted = 1.5f;
 
     // ---------------------------------------------------------------- private
 
@@ -140,8 +138,8 @@ public class FirstPersonFootsteps : MonoBehaviour
         // How hard the breathing is once audible: 0 right at the threshold, 1 exhausted.
         float depth = Mathf.InverseLerp(breathThreshold * breathHysteresis, 1f, exertion);
 
+        // The recording is left at its natural pitch - only volume responds to exertion.
         _breathSource.volume = breathVolume * _breathLevel * Mathf.Lerp(0.5f, 1f, depth);
-        _breathSource.pitch = Mathf.Lerp(1f, breathRateExhausted, depth);
 
         if (_breathLevel > 0.005f && !_breathSource.isPlaying) _breathSource.Play();
         else if (_breathLevel <= 0.005f && _breathSource.isPlaying) _breathSource.Stop();
@@ -281,8 +279,7 @@ public class FirstPersonFootsteps : MonoBehaviour
 
     /// <summary>
     /// One seamless breath cycle: inhale (brighter, faster swell), short pause, exhale
-    /// (darker, longer), pause. The loop starts and ends in silence so it cannot click,
-    /// and pitch scaling on the source speeds the whole cycle up when exhausted.
+    /// (darker, longer), pause. The loop starts and ends in silence so it cannot click.
     /// </summary>
     AudioClip BuildBreathLoop()
     {
