@@ -76,12 +76,21 @@ public class Anomoly05 : MonoBehaviour, Anomoly
         {
             shown = true;
             currentWindow = nearest;
-            // Outward = from the floor interior toward the window, flattened.
+            // Outward = the window pane's normal, away from the floor interior.
+            // The pane is thin: its normal is the thinnest horizontal axis of its bounds.
+            Bounds zoneBounds = new Bounds(currentWindow.position, Vector3.one * 0.5f);
+            Renderer[] renderers = currentWindow.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                zoneBounds = renderers[0].bounds;
+                foreach (Renderer r in renderers) zoneBounds.Encapsulate(r.bounds);
+            }
             Vector3 interior = (transform.parent != null ? transform.parent.position : transform.position)
                              + new Vector3(19f, 0f, -15f);   // rough centre of the floor plan
-            outward = currentWindow.position - interior;
-            outward.y = 0f;
-            outward.Normalize();
+            if (zoneBounds.size.x <= zoneBounds.size.z)
+                outward = new Vector3(Mathf.Sign(zoneBounds.center.x - interior.x), 0f, 0f);
+            else
+                outward = new Vector3(0f, 0f, Mathf.Sign(zoneBounds.center.z - interior.z));
             Vector3 spawn = currentWindow.position + outward * spawnDistance;
             spawn.y = floorY;
             figure.transform.position = spawn;

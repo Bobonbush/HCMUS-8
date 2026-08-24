@@ -1,21 +1,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// The ceiling hangs far lower than it should. A set of solid box slabs (prebuilt,
-// hidden) appears at the low height and the light fixtures drop just beneath them.
-// Boxes are real geometry with thickness, visible from below and colliding, so the
-// player can neither see through nor jump through the false ceiling.
+// The ceiling is subtly WRONG: the whole plane tilts, sagging lower and lower
+// toward the far end of the corridor. Prebuilt solid slanted slabs (with
+// thickness, no see-through) appear and the light fixtures drop to hang just
+// beneath the slanted plane at their own position along the slope.
 public class Anomoly16 : MonoBehaviour, Anomoly
 {
 
-    [Tooltip("The false low-ceiling slabs, prebuilt and disabled by the setup tooling.")]
+    [Tooltip("The slanted false-ceiling slabs, prebuilt and disabled by the setup tooling.")]
     public List<GameObject> ceilingBoxes = new List<GameObject>();
 
-    [Tooltip("Ceiling-mounted light fixtures that drop with the false ceiling.")]
+    [Tooltip("Ceiling-mounted light fixtures that drop onto the slanted plane.")]
     public List<Transform> lights = new List<Transform>();
 
-    [Tooltip("Target local height for the dropped light fixtures, just below the boxes.")]
-    public float lightHeight = 2.9f;
+    [Tooltip("Plane height (local y) at local z = 0.")]
+    public float planeHeightAtZero = 4.9f;
+
+    [Tooltip("Height change per metre of local z. Negative slope sinks toward -z (the far end).")]
+    public float slopePerMeter = 0.043f;
+
+    [Tooltip("How far below the plane the light fixtures hang.")]
+    public float lightDrop = 0.2f;
 
     Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
 
@@ -33,7 +39,7 @@ public class Anomoly16 : MonoBehaviour, Anomoly
             if (light == null) { originals.Add(Vector3.zero); continue; }
             originals.Add(light.localPosition);
             Vector3 p = light.localPosition;
-            p.y = lightHeight;
+            p.y = planeHeightAtZero + slopePerMeter * p.z - lightDrop;
             light.localPosition = p;
         }
     }
