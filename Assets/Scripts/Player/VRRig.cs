@@ -114,7 +114,10 @@ public class VRRig : MonoBehaviour
         controller.vrMode = true;
         controller.moveReference = camT;
 
-        // 4. Runtime-only controller bindings on the shared actions.
+        // 4. Runtime-only controller bindings on the shared actions. The keyboard bindings
+        //    of these actions are muted for the session: the XR Device Simulator uses WASD,
+        //    LeftShift and Space itself, so leaving them live makes the player run and jump
+        //    while you are just steering the simulator.
         if (controller.inputActions != null)
         {
             InputAction move = controller.inputActions.FindAction("Player/Move", false);
@@ -123,12 +126,33 @@ public class VRRig : MonoBehaviour
             if (move != null) move.AddBinding("<XRController>{LeftHand}/thumbstick");
             if (sprint != null) sprint.AddBinding("<XRController>{LeftHand}/thumbstickClicked");
             if (jump != null) jump.AddBinding("<XRController>{RightHand}/primaryButton");
+            MuteKeyboardBindings(move);
+            MuteKeyboardBindings(sprint);
+            MuteKeyboardBindings(jump);
         }
 
         _snapTurnAction = new InputAction(binding: "<XRController>{RightHand}/thumbstick");
         _snapTurnAction.Enable();
 
         Debug.Log("VRRig: headset detected - VR mode active.");
+    }
+
+    /// <summary>
+    /// Session-only overrides (never saved to the asset): empties every keyboard/mouse
+    /// binding path so only gamepad and XR controller bindings stay live in VR.
+    /// </summary>
+    private static void MuteKeyboardBindings(InputAction action)
+    {
+        if (action == null) return;
+        for (int i = 0; i < action.bindings.Count; i++)
+        {
+            string path = action.bindings[i].path;
+            if (!string.IsNullOrEmpty(path) &&
+                (path.StartsWith("<Keyboard>") || path.StartsWith("<Mouse>")))
+            {
+                action.ApplyBindingOverride(i, string.Empty);
+            }
+        }
     }
 
     private void OnDestroy()
