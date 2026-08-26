@@ -97,6 +97,13 @@ public class FirstPersonController : MonoBehaviour
     [Header("Cursor")]
     public bool lockCursorOnStart = true;
 
+    [Header("VR")]
+    [Tooltip("Set by VRRig when a headset drives the view. Look input is ignored (the HMD owns " +
+             "the camera) and movement directions follow Move Reference instead of the body.")]
+    public bool vrMode;
+    [Tooltip("In VR, the head camera. Move input is relative to where the player is looking.")]
+    public Transform moveReference;
+
     // ---------------------------------------------------------------- state
 
     /// <summary>Horizontal speed in m/s, measured from the distance actually covered.</summary>
@@ -282,8 +289,23 @@ public class FirstPersonController : MonoBehaviour
         if (_jumpAction.WasPressedThisFrame()) _jumpBufferTimer = jumpBufferTime;
     }
 
+    /// <summary>VR snap turn: rotates the body without fighting the look pipeline.</summary>
+    public void AddYaw(float degrees)
+    {
+        _yaw += degrees;
+    }
+
     void UpdateLook(float dt)
     {
+        if (vrMode)
+        {
+            // The HMD owns the view. Body yaw still applies (snap turn via AddYaw);
+            // the camera pivot is left alone for the TrackedPoseDriver-driven camera.
+            _lookDeltaDegrees = Vector2.zero;
+            transform.localRotation = Quaternion.Euler(0f, _yaw, 0f);
+            return;
+        }
+
         Vector2 mouse = Vector2.zero;
         Vector2 stick = Vector2.zero;
 
@@ -369,7 +391,9 @@ public class FirstPersonController : MonoBehaviour
 
     void UpdateMovement(float dt)
     {
-        Vector3 wishDir = transform.right * _moveInput.x + transform.forward * _moveInput.y;
+        // In VR, "forward" is where the head looks; on desktop it is the body.
+        Transform reference = vrMode && moveReference != null ? moveReference : transform;
+        Vector3 wishDir = reference.right * _moveInput.x + reference.forward * _moveInput.y;
         wishDir.y = 0f;
         float inputMagnitude = Mathf.Clamp01(wishDir.magnitude);
         if (inputMagnitude > 0.001f) wishDir /= inputMagnitude;
