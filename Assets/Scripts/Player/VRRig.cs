@@ -44,6 +44,8 @@ public class VRRig : MonoBehaviour
 
     private InputAction _snapTurnAction;
     private TrackedPoseDriver _poseDriver;
+    private Transform _trackingOffset;
+    private CharacterController _cc;
     private bool _snapArmed = true;
 
     private void Awake()
@@ -73,6 +75,31 @@ public class VRRig : MonoBehaviour
         {
             _snapArmed = true;
         }
+
+        BodyFollowsHead();
+    }
+
+    /// <summary>
+    /// Room-scale correctness: when the tracked head moves away from the body (physically
+    /// walking, or steering the simulator's HMD), the body capsule chases it WITH collisions,
+    /// and the tracking space shifts back by however far the body actually moved so the head
+    /// stays where the player put it. Anomoly triggers, lifts and walls all key off the body,
+    /// so without this a simulator head could ghost through the whole floor.
+    /// </summary>
+    private void BodyFollowsHead()
+    {
+        if (_cc == null || _trackingOffset == null || playerCamera == null) return;
+
+        Vector3 delta = playerCamera.transform.position - controller.transform.position;
+        delta.y = 0f;
+        if (delta.sqrMagnitude < 0.0004f) return;   // within 2cm - close enough
+
+        Vector3 before = controller.transform.position;
+        _cc.Move(delta);
+        Vector3 moved = controller.transform.position - before;
+        moved.y = 0f;
+        // pull the tracking space back so the camera does not get dragged along
+        _trackingOffset.position -= moved;
     }
 
     private static bool HeadsetPresent()
@@ -92,10 +119,18 @@ public class VRRig : MonoBehaviour
         // 1. Camera feel off - the real head does all of this in VR.
         if (cameraFeel != null) cameraFeel.enabled = false;
 
-        // 2. Head-tracked camera parented to the player root (the root is the XR origin:
-        //    body yaw rotates it, the tracked pose supplies eye height on top).
+        // 2. Head-tracked camera under a tracking-offset node on the player root (the root
+        //    is the XR origin: body yaw rotates it, the tracked pose supplies eye height,
+        //    and the offset node lets BodyFollowsHead recentre the space over the body).
+        _cc = controller.GetComponent<CharacterController>();
+        GameObject offsetGo = new GameObject("VRTrackingOffset");
+        _trackingOffset = offsetGo.transform;
+        _trackingOffset.SetParent(controller.transform, false);
+        _trackingOffset.localPosition = Vector3.zero;
+        _trackingOffset.localRotation = Quaternion.identity;
+
         Transform camT = playerCamera.transform;
-        camT.SetParent(controller.transform, false);
+        camT.SetParent(_trackingOffset, false);
         camT.localPosition = Vector3.zero;
         camT.localRotation = Quaternion.identity;
 
