@@ -15,6 +15,9 @@ public class Anomoly02 : MonoBehaviour, Anomoly
     private float coolDown = 10000.0f;
     public void Restore()
     {
+        // Disarm the pending timer too, otherwise a restore before the lights went out
+        // still turns them all off a few seconds later.
+        coolDown = 10000.0f;
         TurnAllLight(true);
     }
 

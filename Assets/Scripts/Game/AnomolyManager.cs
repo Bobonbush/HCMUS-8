@@ -21,20 +21,21 @@ public class AnomolyManager : MonoBehaviour
 
     public void RestoreAnomoly()
     {
-        
-        if(currentAnomoly.getType() == Anomoly.EvaluateType.Global)
+        // No anomoly was generated this round (the dice in GameManager.NewMap can roll 0).
+        if (currentAnomoly == null) return;
+
+        if(currentAnomoly.getType() == Anomoly.EvaluateType.Global
+            || currentAnomoly.getType() == Anomoly.EvaluateType.AddUp)
         {
+            // AddUp evaluated on a neighbour floor, so restore has to reach every floor too.
             GameManager.Instance.ForceRestoreAll();
         }else
         {
-            if (currentAnomoly != null)
-            {
-                currentAnomoly.Restore();
-            }
+            currentAnomoly.Restore();
             currentAnomoly = null;
         }
 
-        
+
     }
 
     public void ForceRestore()
@@ -71,6 +72,14 @@ public class AnomolyManager : MonoBehaviour
             if (anomoly.getType() == Anomoly.EvaluateType.Global)
             {
                 GameManager.Instance.ForceAnomolyAll(randomMize);
+            }
+            else if (anomoly.getType() == Anomoly.EvaluateType.AddUp)
+            {
+                // Runs on the floor above or below the player. Keep the local instance as
+                // currentAnomoly (without Evaluate) so RestoreAnomoly can see the type.
+                currentAnomoly = anomoly;
+                int direction = Random.Range(0, 2) == 0 ? 1 : -1;
+                GameManager.Instance.ForceAnomoly(direction, randomMize);
             }
             else
             {
