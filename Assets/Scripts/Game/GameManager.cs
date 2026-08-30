@@ -69,10 +69,10 @@ public class GameManager : MonoBehaviour
     {
         float currentFloorY = createdFloor[CurrentFloor - 1].transform.position.y;
 
-        if(currentFloorY + offset /1.5f < playerTransform.position.y )
+        if(currentFloorY + offset / 2.0f < playerTransform.position.y )
         {
             ShiftAllFloorUpXUnit(1);
-        }else if(currentFloorY - offset /1.5f > playerTransform.position.y)
+        }else if(currentFloorY - offset /2.0f > playerTransform.position.y)
         {
             ShiftAllFloorUpXUnit(-1);
         }
@@ -117,6 +117,7 @@ public class GameManager : MonoBehaviour
         }else
         {
             Debug.Log("Wrong Anomoly");
+            CurrentFloor = 8;
         }
 
 

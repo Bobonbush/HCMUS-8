@@ -279,7 +279,7 @@ public class FirstPersonController : MonoBehaviour
             if (_moveInput.sqrMagnitude < 0.01f) _sprintToggleState = false;
         }
 
-        if (_jumpAction.WasPressedThisFrame()) _jumpBufferTimer = jumpBufferTime;
+        //if (_jumpAction.WasPressedThisFrame()) _jumpBufferTimer = jumpBufferTime;
     }
 
     void UpdateLook(float dt)
