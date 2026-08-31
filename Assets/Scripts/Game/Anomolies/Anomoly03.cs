@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using UnityEngine;
+using System.Collections.Generic;
 
 // Something on the neighbour floor, seen through the atrium.
 // Above the player: a body hangs from the railing of the floor above, dangling
@@ -16,7 +18,9 @@ public class Anomoly03 : MonoBehaviour, Anomoly
     public ShadowFigure hangedFigure;
 
     [Tooltip("Where the standing figure goes when this floor is below the player.")]
-    public Transform lowerAnchor;
+
+    [SerializeField]
+    public List<Transform> Anchor;
 
     [Tooltip("Degrees of slow sway for the hanging body.")]
     public float swayDegrees = 1.2f;
@@ -36,15 +40,17 @@ public class Anomoly03 : MonoBehaviour, Anomoly
             if (hangedFigure == null) return;
             hangedActive = true;
             hangedBaseRotation = hangedFigure.transform.rotation;
-            hangedFigure.facePlayer = false;   // fixed, never turns
+            hangedFigure.transform.position = Anchor[Random.Range(0, Anchor.Count)].transform.position;
+            hangedFigure.facePlayer = true;   // fixed, never turns
             hangedFigure.Show(true);
         }
         else
         {
-            if (figure == null || lowerAnchor == null) return;
-            figure.transform.position = lowerAnchor.position;
-            figure.transform.rotation = lowerAnchor.rotation;
-            figure.facePlayer = false;
+            if (figure == null ) return;
+
+            figure.transform.position = Anchor[Random.Range(0, Anchor.Count)].transform.position;
+            figure.transform.rotation = Anchor[Random.Range(0, Anchor.Count)].transform.rotation;
+            figure.facePlayer = true;
             figure.Show(true);
         }
     }

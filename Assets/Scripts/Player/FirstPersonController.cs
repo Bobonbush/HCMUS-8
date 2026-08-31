@@ -286,7 +286,7 @@ public class FirstPersonController : MonoBehaviour
             if (_moveInput.sqrMagnitude < 0.01f) _sprintToggleState = false;
         }
 
-        if (_jumpAction.WasPressedThisFrame()) _jumpBufferTimer = jumpBufferTime;
+        //if (_jumpAction.WasPressedThisFrame()) _jumpBufferTimer = jumpBufferTime;
     }
 
     /// <summary>VR snap turn: rotates the body without fighting the look pipeline.</summary>
