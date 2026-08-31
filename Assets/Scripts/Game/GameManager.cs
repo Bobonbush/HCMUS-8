@@ -78,10 +78,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
+    private void RestoreAnomoly()
+    {
+        createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().RestoreAnomoly();
+    }
     private void EvaluateAnomoly()
     {
         createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().GenerateAnomoly();
+    }
+
+    private void RestoreNPC()
+    {
+        createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().RestoreNPC();
+    }
+
+    private void EvaluateNPC()
+    {
+        createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().ActiveNPC();
     }
 
 
@@ -89,13 +102,17 @@ public class GameManager : MonoBehaviour
     {
         // Generate Anomoly here
         int dice = Random.Range(0, 5);
+
+
+        
         if (AlwaysAnomoly) dice = 1;
-        if(dice == 0)
+
+        EvaluateNPC();
+        if (dice == 0)
         {
             anomoly_flag = 0;
         }else
         {
-            Debug.Log("Generating Anomoly");
             EvaluateAnomoly();
             anomoly_flag = 1;
         }
@@ -104,7 +121,9 @@ public class GameManager : MonoBehaviour
     public void QueryEnter(int anomoly)
     {
 
-        createdFloor[CurrentFloor-1].GetComponent<AnomolyManager>().RestoreAnomoly();
+        RestoreAnomoly();
+        RestoreNPC();
+        
         if (anomoly_flag == anomoly)
         {
             Debug.Log("Correct Anomoly");

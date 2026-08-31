@@ -20,7 +20,8 @@ public interface Anomoly
         Single,
         // Evaluate runs on the floor above or below the player (GameManager.ForceAnomoly(+1/-1, index)).
         // The anomoly on the player's own floor is only bookkeeping so RestoreAnomoly knows the type.
-        AddUp
+        AddUp,
+        NPCInvolve
     };
 
     public EvaluateType getType();
