@@ -22081,6 +22081,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anomoly06
   figure: {fileID: 6308697714227491927}
+  revealDistance: 2.4
+  emergeDuration: 4
+  emergeOffset: {x: 0, y: 0, z: -0.08}
 --- !u!1 &6560834669516327474
 GameObject:
   m_ObjectHideFlags: 0
@@ -50725,27 +50728,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0a6a66bddc7b40e4e8fe37b2fcb0bf60, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.0062
+      value: 0.0036
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0a6a66bddc7b40e4e8fe37b2fcb0bf60, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.0062
+      value: 0.0036
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0a6a66bddc7b40e4e8fe37b2fcb0bf60, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.0062
+      value: 0.0036
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0a6a66bddc7b40e4e8fe37b2fcb0bf60, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.06646401
+      value: 0.042584002
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0a6a66bddc7b40e4e8fe37b2fcb0bf60, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.43152002
+      value: -0.25363937
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0a6a66bddc7b40e4e8fe37b2fcb0bf60, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.16045599
+      value: -0.16293131
       objectReference: {fileID: 0}
     - target: {fileID: 8897093224900880590, guid: 0a6a66bddc7b40e4e8fe37b2fcb0bf60, type: 3}
       propertyPath: m_LocalRotation.w
