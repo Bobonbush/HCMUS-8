@@ -47,6 +47,13 @@ public class AnomolyTester : MonoBehaviour
         
         { "Anomoly20", "Someone hangs from the ceiling of the lit classroom" },
         { "Anomoly08", "Toilet keep blushing" },
+        { "Anomoly10", "Count the corridor ceiling lights - there are more of them than usual" },
+        { "Anomoly12", "The desks are stacked in a heap in the middle of the classroom" },
+        { "Anomoly13", "A classroom that should be dark lights up on its own after ~5s" },
+        { "Anomoly18", "Corridor props (bin, extinguisher, room sign) swell slowly over ~45s" },
+        { "Anomoly22", "The conference poster on the green board by the toilets - check its logo" },
+        { "Anomoly24", "The crest by the lifts is UEH, not HCMUS" },
+        { "Anomoly26", "One ceiling light fixture hangs at the wrong angle - the lighting is unchanged" },
         { "Anomoly31", "Someone Fall from above" },
     };
 
