@@ -44,7 +44,9 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly29", "Step into either lift - you will be swapped to the other one" },
         { "Anomoly07", "Classroom banner reads TPCS instead of APCS - above the chalkboard" },
         { "Anomoly06", "Someone in the wall mirror - toilet, above the sinks" },
+        
         { "Anomoly20", "Someone hangs from the ceiling of the lit classroom" },
+        { "Anomoly08", "Toilet keep blushing" },
     };
 
     private void Awake()

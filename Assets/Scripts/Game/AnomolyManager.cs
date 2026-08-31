@@ -75,8 +75,6 @@ public class AnomolyManager : MonoBehaviour
             }
             else if (anomoly.getType() == Anomoly.EvaluateType.AddUp)
             {
-                // Runs on the floor above or below the player. Keep the local instance as
-                // currentAnomoly (without Evaluate) so RestoreAnomoly can see the type.
                 currentAnomoly = anomoly;
                 int direction = Random.Range(0, 2) == 0 ? 1 : -1;
                 GameManager.Instance.ForceAnomoly(direction, randomMize);

@@ -17,6 +17,7 @@ public class Flickering : MonoBehaviour
 
     private float flickerTiming = 0.0f;
 
+    [SerializeField]
     private bool active = false;
 
     void Start()

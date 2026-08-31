@@ -35,6 +35,9 @@ public class ElevatorSounds : MonoBehaviour
     private Vector3 closedA, closedB, openA, openB;
     private Vector3 closedA2, closedB2, openA2, openB2;
 
+    [SerializeField]
+    BoxCollider block;
+
     private void Awake()
     {
         source = GetComponent<AudioSource>();
@@ -92,6 +95,7 @@ public class ElevatorSounds : MonoBehaviour
         {
             if (doorCloseClip != null) source.PlayOneShot(doorCloseClip, volume);
             doorsOpen = false;
+            block.enabled = true;
             stage = 1;
             timer = dingDelay;
         }
@@ -118,16 +122,20 @@ public class ElevatorSounds : MonoBehaviour
 
         if (stage == 1)
         {
+            
             if (dingClip != null) source.PlayOneShot(dingClip, volume);
             stage = 2;
             timer = openDelay;
+
         }
         else if (stage == 2)
         {
+            block.enabled = false;
             if (doorOpenClip != null) source.PlayOneShot(doorOpenClip, volume);
             doorsOpen = true;
             stage = 0;
             timer = -1f;
+            block.enabled = false;
         }
     }
 }
