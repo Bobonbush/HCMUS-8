@@ -9,6 +9,9 @@ public class AnomolyManager : MonoBehaviour
 
     Anomoly currentAnomoly = null;
 
+    [SerializeField]
+    private GameObject npc;
+
     
     public List<MonoBehaviour> anomolies;
 
@@ -18,10 +21,38 @@ public class AnomolyManager : MonoBehaviour
      * 
     */
 
+    private void Start()
+    {
+        RestoreNPC();
+    }
+
+
+    public void RestoreNPC()
+    {
+        npc.GetComponent<NPC>().Reset();
+        DisableNPC();
+    }
+
+    public void ActiveNPC()
+    {
+        Invoke(nameof(EnableNPC), 3.0f);
+
+    }
+
+    private void DisableNPC()
+    {
+        npc.SetActive(false);
+    }
+
+    private void EnableNPC()
+    {
+        npc.SetActive(true);
+    }
+
+
 
     public void RestoreAnomoly()
     {
-        // No anomoly was generated this round (the dice in GameManager.NewMap can roll 0).
         if (currentAnomoly == null) return;
 
         if(currentAnomoly.getType() == Anomoly.EvaluateType.Global
@@ -59,6 +90,7 @@ public class AnomolyManager : MonoBehaviour
     }
 
 
+
     public void GenerateAnomoly()
     {
         
@@ -68,7 +100,7 @@ public class AnomolyManager : MonoBehaviour
 
         if (anomolies[randomMize] is Anomoly anomoly)
         {
-
+            
             if (anomoly.getType() == Anomoly.EvaluateType.Global)
             {
                 GameManager.Instance.ForceAnomolyAll(randomMize);
