@@ -47,6 +47,7 @@ public class AnomolyTester : MonoBehaviour
         
         { "Anomoly20", "Someone hangs from the ceiling of the lit classroom" },
         { "Anomoly08", "Toilet keep blushing" },
+        { "Anomoly31", "Someone Fall from above" },
     };
 
     private void Awake()
