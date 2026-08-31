@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     private int CurrentFloor = 4;
+
+    private int pFlip = 0;
     
     private float offset = 5.664f;
     
@@ -24,6 +26,8 @@ public class GameManager : MonoBehaviour
     private int anomoly_flag = 0;
 
     private bool infinityMode = true;
+
+    private bool sleepQuery = false;
 
 
     private void Awake()
@@ -94,6 +98,10 @@ public class GameManager : MonoBehaviour
 
     private void EvaluateNPC()
     {
+        if (createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().currentType == Anomoly.EvaluateType.NPCInvolve)
+        {
+            return;
+        }
         createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().ActiveNPC();
     }
 
@@ -107,7 +115,7 @@ public class GameManager : MonoBehaviour
         
         if (AlwaysAnomoly) dice = 1;
 
-        EvaluateNPC();
+        
         if (dice == 0)
         {
             anomoly_flag = 0;
@@ -116,11 +124,17 @@ public class GameManager : MonoBehaviour
             EvaluateAnomoly();
             anomoly_flag = 1;
         }
+
+        EvaluateNPC();
     }
 
     public void QueryEnter(int anomoly)
     {
-
+        if(sleepQuery)
+        {
+            sleepQuery = false;
+            return;
+        }
         RestoreAnomoly();
         RestoreNPC();
         
@@ -180,6 +194,22 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < createdFloor.Count; i++)
         {
             createdFloor[i].GetComponent<AnomolyManager>().ForceRestore();
+        }
+    }
+
+    public void Flip()
+    {
+        sleepQuery = true;
+        Transform floorTransform = createdFloor[CurrentFloor -1].transform;
+
+        floorTransform.localScale = new Vector3( - floorTransform.localScale.x, floorTransform.localScale.y, floorTransform.localScale.z);
+        if (floorTransform.localScale.x < 0.0f)
+        {
+            floorTransform.position = new Vector3(42.33f + (89.28f - 49.09616f), floorTransform.position.y, -99.65f);
+            
+        }else
+        {
+            floorTransform.position = new Vector3(42.33f, floorTransform.position.y, -99.65f);
         }
     }
 }

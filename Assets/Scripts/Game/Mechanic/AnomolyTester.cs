@@ -55,6 +55,8 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly24", "The crest by the lifts is UEH, not HCMUS" },
         { "Anomoly26", "One ceiling light fixture hangs at the wrong angle - the lighting is unchanged" },
         { "Anomoly31", "Someone Fall from above" },
+        { "Anomoly32", "The NPC Chasing us" },
+        { "Anomoly25", "Flip the whole floor" },
     };
 
     private void Awake()
