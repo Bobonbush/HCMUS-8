@@ -3,7 +3,8 @@ using UnityEngine;
 // Looking into the toilet mirror, something is looking back at you. The figure
 // starts sunk into the wall behind the glass; when the player walks up to the
 // mirror it slowly pushes out through the surface until it sits pressed against
-// the glass, framed by the mirror.
+// the glass - then it lunges straight at the camera, filling the screen for a
+// beat before vanishing. One scare per evaluation.
 public class Anomoly06 : MonoBehaviour, Anomoly
 {
 
@@ -18,23 +19,46 @@ public class Anomoly06 : MonoBehaviour, Anomoly
     [Tooltip("Offset (in the figure parent's space) the figure hides at before emerging - just far enough behind the glass to be occluded. Keep it shallow: everything deeper than the glass is invisible travel. Set by the wiring tooling.")]
     public Vector3 emergeOffset = new Vector3(0f, 0f, 0.08f);
 
+    [Header("Jumpscare")]
+    [Tooltip("Pause between full emergence and the lunge.")]
+    public float scareDelay = 0.35f;
+    [Tooltip("Seconds the lunge takes to reach the camera.")]
+    public float lungeDuration = 0.22f;
+    [Tooltip("Seconds the figure holds glued to the screen.")]
+    public float lungeHold = 0.4f;
+    [Tooltip("Distance in front of the camera the figure flies to.")]
+    public float lungeDistance = 0.65f;
+    [Tooltip("Scale multiplier at the end of the lunge.")]
+    public float lungeScale = 2.2f;
+
     Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
 
+    // 0 waiting for the player, 1 emerging, 2 emerged (waiting to pounce),
+    // 3 lunging, 4 holding on screen, 5 done (vanished)
+    private int phase;
     private bool active;
-    private bool emerging;      // latched once the player has come close enough
-    private float progress;     // 0 = hidden inside the wall, 1 = pressed against the glass
-    private Vector3 shownPos;   // authored pose = fully emerged
-    private bool shownPosCaptured;
+    private float progress;         // emergence 0..1
+    private float phaseTimer;
+    private Vector3 lungeFrom;
+
+    private Vector3 shownPos;       // authored pose = fully emerged
+    private Quaternion baseRot;
+    private Vector3 baseScale;
+    private bool basePoseCaptured;
+
+    private FirstPersonCameraFeel cameraFeel;
 
     public void Evaluate()
     {
         if (figure == null) return;
-        CaptureShownPos();
+        CaptureBasePose();
         active = true;
-        emerging = false;
+        phase = 0;
         progress = 0f;
+        phaseTimer = 0f;
         // Visible but parked behind the glass; the wall and mirror backing occlude it,
         // so nothing shows until the emergence slides it through the surface.
+        ResetFigurePose();
         figure.transform.localPosition = shownPos + emergeOffset;
         figure.Show(true);
     }
@@ -42,43 +66,105 @@ public class Anomoly06 : MonoBehaviour, Anomoly
     public void Restore()
     {
         active = false;
-        emerging = false;
+        phase = 0;
         progress = 0f;
+        phaseTimer = 0f;
         if (figure == null) return;
-        CaptureShownPos();
-        figure.transform.localPosition = shownPos;
+        CaptureBasePose();
+        ResetFigurePose();
         figure.Show(false);
     }
 
-    private void CaptureShownPos()
+    private void CaptureBasePose()
     {
-        if (shownPosCaptured) return;
+        if (basePoseCaptured) return;
         shownPos = figure.transform.localPosition;
-        shownPosCaptured = true;
+        baseRot = figure.transform.localRotation;
+        baseScale = figure.transform.localScale;
+        basePoseCaptured = true;
+    }
+
+    private void ResetFigurePose()
+    {
+        figure.transform.localPosition = shownPos;
+        figure.transform.localRotation = baseRot;
+        figure.transform.localScale = baseScale;
     }
 
     private void Update()
     {
         // 12 floor instances tick this every frame - bail before any real work.
-        if (!active || figure == null) return;
+        if (!active || figure == null || phase >= 5) return;
 
-        if (!emerging)
+        Transform player = GameManager.Instance != null ? GameManager.Instance.GetPlayerTransform() : null;
+        if (player == null) return;
+        float playerDistance = Vector3.Distance(player.position, figure.transform.position);
+
+        if (phase == 0)
         {
-            if (GameManager.Instance == null) return;
-            Transform player = GameManager.Instance.GetPlayerTransform();
-            if (player == null) return;
-            if (Vector3.Distance(player.position, figure.transform.position) > revealDistance) return;
-            emerging = true;
+            if (playerDistance > revealDistance) return;
+            phase = 1;
         }
 
-        if (progress >= 1f) return;
-        progress = Mathf.Min(1f, progress + Time.deltaTime / Mathf.Max(0.1f, emergeDuration));
-        float eased = progress * progress * (3f - 2f * progress);   // smoothstep: slow start, slow settle
+        if (phase == 1)
+        {
+            progress = Mathf.Min(1f, progress + Time.deltaTime / Mathf.Max(0.1f, emergeDuration));
+            float eased = progress * progress * (3f - 2f * progress);   // smoothstep: slow start, slow settle
+            Vector3 pos = shownPos + emergeOffset * (1f - eased);
+            // A faint shudder while it pushes through the glass, gone once it is out.
+            pos.x += Mathf.Sin(Time.time * 27f) * 0.004f * Mathf.Sin(progress * Mathf.PI);
+            figure.transform.localPosition = pos;
+            if (progress >= 1f) { phase = 2; phaseTimer = 0f; }
+            return;
+        }
 
-        Vector3 pos = shownPos + emergeOffset * (1f - eased);
-        // A faint shudder while it pushes through the glass, gone once it is out.
-        pos.x += Mathf.Sin(Time.time * 27f) * 0.004f * Mathf.Sin(progress * Mathf.PI);
-        figure.transform.localPosition = pos;
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        if (phase == 2)
+        {
+            // Pounce only while the player is actually near the mirror; otherwise it
+            // stays pressed against the glass, waiting.
+            if (playerDistance > revealDistance + 0.8f) return;
+            phaseTimer += Time.deltaTime;
+            if (phaseTimer < scareDelay) return;
+            phase = 3;
+            phaseTimer = 0f;
+            lungeFrom = figure.transform.position;
+            if (cameraFeel == null) cameraFeel = FindFirstObjectByType<FirstPersonCameraFeel>();
+            if (cameraFeel != null && cameraFeel.enabled) cameraFeel.ExternalImpulse(0.6f, 4f);
+        }
+
+        // Where "filling the screen" is this frame; recomputed so it tracks the view.
+        Vector3 screenPoint = cam.transform.position + cam.transform.forward * lungeDistance
+                            - cam.transform.up * 0.04f;
+        Quaternion faceCam = Quaternion.LookRotation(cam.transform.position - screenPoint, cam.transform.up);
+
+        if (phase == 3)
+        {
+            phaseTimer += Time.deltaTime;
+            float t = Mathf.Clamp01(phaseTimer / Mathf.Max(0.05f, lungeDuration));
+            t = t * t;                                   // accelerating rush
+            figure.transform.position = Vector3.Lerp(lungeFrom, screenPoint, t);
+            figure.transform.rotation = Quaternion.Slerp(figure.transform.rotation, faceCam, t);
+            figure.transform.localScale = baseScale * Mathf.Lerp(1f, lungeScale, t);
+            if (t >= 1f) { phase = 4; phaseTimer = 0f; }
+            return;
+        }
+
+        if (phase == 4)
+        {
+            // Glued to the camera so it stays fullscreen even if the view whips around.
+            figure.transform.position = screenPoint;
+            figure.transform.rotation = faceCam;
+            phaseTimer += Time.deltaTime;
+            if (phaseTimer >= lungeHold)
+            {
+                phase = 5;
+                ResetFigurePose();
+                figure.Show(false);                      // gone - the mirror is empty again
+            }
+        }
     }
 
     public Anomoly.EvaluateType getType()
