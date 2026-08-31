@@ -29,6 +29,13 @@ public static class MockVRMenu
             Debug.Log("MockVR: already running.");
             return;
         }
+        // Two XRHMD devices (simulator + mock runtime) would fight over the camera pose;
+        // the mock session takes priority, so park the simulator first.
+        foreach (var sim in Object.FindObjectsByType<UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation.XRDeviceSimulator>(FindObjectsSortMode.None))
+        {
+            sim.gameObject.SetActive(false);
+            Debug.Log("MockVR: XR Device Simulator disabled to avoid two head-pose sources.");
+        }
         manager.InitializeLoaderSync();
         if (manager.activeLoader == null)
         {

@@ -22,8 +22,10 @@ public class ClockHands : MonoBehaviour
     {
         float step = minuteDegreesPerSecond * direction * Time.deltaTime;
         // Hands rotate around their local Z; the hour hand moves at 1/12 the minute rate.
-        if (secondHand != null) secondHand.Rotate(0f, 0f, -secondDegreesPerSecond * direction * Time.deltaTime);
-        if (minuteHand != null) minuteHand.Rotate(0f, 0f, -step);
-        if (hourHand != null) hourHand.Rotate(0f, 0f, -step / 12f);
+        // Positive spin here reads as clockwise from the corridor (playtest-verified;
+        // the sign was flipped before).
+        if (secondHand != null) secondHand.Rotate(0f, 0f, secondDegreesPerSecond * direction * Time.deltaTime);
+        if (minuteHand != null) minuteHand.Rotate(0f, 0f, step);
+        if (hourHand != null) hourHand.Rotate(0f, 0f, step / 12f);
     }
 }

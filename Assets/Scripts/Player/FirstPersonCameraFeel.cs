@@ -190,6 +190,16 @@ public class FirstPersonCameraFeel : MonoBehaviour
 
     // ---------------------------------------------------------------- events
 
+    /// <summary>
+    /// Lets world systems kick the camera springs - the elevator uses this for its
+    /// departure and arrival jolts. Respects the player's Camera Shake setting.
+    /// </summary>
+    public void ExternalImpulse(float yVelocity, float pitchVelocity)
+    {
+        _springY.Impulse(yVelocity * shakeScale);
+        _springPitch.Impulse(pitchVelocity * shakeScale);
+    }
+
     void HandleFootstep(FirstPersonController.Foot foot, float intensity)
     {
         intensity *= shakeScale;

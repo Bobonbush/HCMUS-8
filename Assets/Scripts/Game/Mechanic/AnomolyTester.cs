@@ -21,6 +21,8 @@ public class AnomolyTester : MonoBehaviour
     private bool active;
     private int step = -1;          // -1 = clean floor, nothing evaluated
     private string status = "";
+    private List<Step> cachedSteps;   // OnGUI fires several times per frame; never rebuild there
+    private GUIStyle labelStyle;
 
     private struct Step
     {
@@ -74,7 +76,7 @@ public class AnomolyTester : MonoBehaviour
 
     public void Next(int direction)
     {
-        List<Step> steps = BuildSteps();
+        List<Step> steps = cachedSteps = BuildSteps();
         if (steps.Count == 0) { status = "no AnomolyManager found"; return; }
 
         step = ((step + direction) % (steps.Count + 1) + steps.Count + 1) % (steps.Count + 1);
@@ -158,14 +160,18 @@ public class AnomolyTester : MonoBehaviour
     private void OnGUI()
     {
         if (!active) return;
-        List<Step> steps = BuildSteps();
-        string header = step >= 0 && step < steps.Count
+        List<Step> steps = cachedSteps;
+        string header = steps != null && step >= 0 && step < steps.Count
             ? "[" + (step + 1) + "/" + steps.Count + "] "
             : "";
         string text = "ANOMOLY TESTER   N: next | B: back | R: restore | F1: hide\n" + header + status;
 
-        GUIStyle style = new GUIStyle(GUI.skin.label) { fontSize = 16, richText = false };
-        style.normal.textColor = Color.white;
+        if (labelStyle == null)
+        {
+            labelStyle = new GUIStyle(GUI.skin.label) { fontSize = 16, richText = false };
+            labelStyle.normal.textColor = Color.white;
+        }
+        GUIStyle style = labelStyle;
         GUI.color = new Color(0f, 0f, 0f, 0.65f);
         GUI.DrawTexture(new Rect(8, 8, 660, 70), Texture2D.whiteTexture);
         GUI.color = Color.white;

@@ -35,14 +35,21 @@ public class Anomoly29 : MonoBehaviour, Anomoly
         SetTriggersEnabled(true);
     }
 
+    private BoxCollider _boxA, _boxB;
+
     private void Update()
     {
+        // 12 floor instances run this every frame - bail before any real work unless
+        // this instance actually has something to do.
+        if (!active && !collidersDisabled) return;
         if (GameManager.Instance == null || liftTriggerA == null || liftTriggerB == null) return;
         Transform player = GameManager.Instance.GetPlayerTransform();
         if (player == null) return;
 
-        BoxCollider boxA = liftTriggerA.GetComponent<BoxCollider>();
-        BoxCollider boxB = liftTriggerB.GetComponent<BoxCollider>();
+        if (_boxA == null) _boxA = liftTriggerA.GetComponent<BoxCollider>();
+        if (_boxB == null) _boxB = liftTriggerB.GetComponent<BoxCollider>();
+        BoxCollider boxA = _boxA;
+        BoxCollider boxB = _boxB;
         if (boxA == null || boxB == null) return;
 
         // Grow the bounds a little so "outside" really means clear of the trigger.

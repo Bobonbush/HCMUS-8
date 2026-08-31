@@ -66,6 +66,9 @@ public class FirstPersonController : MonoBehaviour
     public bool sprintRequiresForward = true;
 
     [Header("Jump & Gravity")]
+    [Tooltip("The team disabled jumping (commit 1230d92 commented the input read out). This switch " +
+             "makes that decision explicit instead of a dead code path; flip it to bring jump back.")]
+    public bool allowJump = false;
     public float jumpHeight = 1.0f;
     public float gravity = -20f;
     [Tooltip("Gravity is multiplied by this while falling, so the arc is snappy rather than floaty.")]
@@ -286,7 +289,7 @@ public class FirstPersonController : MonoBehaviour
             if (_moveInput.sqrMagnitude < 0.01f) _sprintToggleState = false;
         }
 
-        //if (_jumpAction.WasPressedThisFrame()) _jumpBufferTimer = jumpBufferTime;
+        if (allowJump && _jumpAction.WasPressedThisFrame()) _jumpBufferTimer = jumpBufferTime;
     }
 
     /// <summary>VR snap turn: rotates the body without fighting the look pipeline.</summary>
