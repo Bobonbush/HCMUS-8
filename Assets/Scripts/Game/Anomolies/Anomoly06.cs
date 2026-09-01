@@ -30,6 +30,9 @@ public class Anomoly06 : MonoBehaviour, Anomoly
     public float lungeDistance = 0.65f;
     [Tooltip("Scale multiplier at the end of the lunge.")]
     public float lungeScale = 2.2f;
+    [Tooltip("Scream played as the figure lunges. Kept quiet on purpose.")]
+    public AudioClip scareClip;
+    [Range(0f, 1f)] public float scareVolume = 0.35f;
 
     Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
 
@@ -47,6 +50,7 @@ public class Anomoly06 : MonoBehaviour, Anomoly
     private bool basePoseCaptured;
 
     private FirstPersonCameraFeel cameraFeel;
+    private AudioSource scareSource;
 
     public void Evaluate()
     {
@@ -73,6 +77,7 @@ public class Anomoly06 : MonoBehaviour, Anomoly
         CaptureBasePose();
         ResetFigurePose();
         figure.Show(false);
+        if (scareSource != null) scareSource.Stop();
     }
 
     private void CaptureBasePose()
@@ -133,6 +138,17 @@ public class Anomoly06 : MonoBehaviour, Anomoly
             lungeFrom = figure.transform.position;
             if (cameraFeel == null) cameraFeel = FindFirstObjectByType<FirstPersonCameraFeel>();
             if (cameraFeel != null && cameraFeel.enabled) cameraFeel.ExternalImpulse(0.6f, 4f);
+            if (scareClip != null)
+            {
+                if (scareSource == null)
+                {
+                    scareSource = gameObject.AddComponent<AudioSource>();
+                    scareSource.playOnAwake = false;
+                    scareSource.spatialBlend = 0f;   // right in your face, not positional
+                    scareSource.outputAudioMixerGroup = Game.UI.SettingsService.FindMixerGroup("Sfx");
+                }
+                scareSource.PlayOneShot(scareClip, scareVolume);
+            }
         }
 
         // Where "filling the screen" is this frame; recomputed so it tracks the view.
@@ -163,7 +179,27 @@ public class Anomoly06 : MonoBehaviour, Anomoly
                 phase = 5;
                 ResetFigurePose();
                 figure.Show(false);                      // gone - the mirror is empty again
+                // The scream clip is much longer than the scare; let its tail ring
+                // briefly, then fade it out instead of cutting or playing on forever.
+                if (scareSource != null && scareSource.isPlaying) StartCoroutine(FadeOutScream());
             }
+        }
+    }
+
+    private System.Collections.IEnumerator FadeOutScream()
+    {
+        yield return new WaitForSeconds(1.2f);
+        float t = 0f;
+        while (t < 0.8f && scareSource != null && scareSource.isPlaying)
+        {
+            t += Time.deltaTime;
+            scareSource.volume = Mathf.Lerp(1f, 0f, t / 0.8f);
+            yield return null;
+        }
+        if (scareSource != null)
+        {
+            scareSource.Stop();
+            scareSource.volume = 1f;
         }
     }
 

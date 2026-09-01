@@ -31551,6 +31551,8 @@ MonoBehaviour:
   lungeHold: 0.4
   lungeDistance: 0.65
   lungeScale: 2.2
+  scareClip: {fileID: 8300000, guid: 6510e4f3dd39c9d4aa5d8e090bb67076, type: 3}
+  scareVolume: 0.35
 --- !u!1 &6560834669516327474
 GameObject:
   m_ObjectHideFlags: 0
@@ -44404,7 +44406,8 @@ Transform:
   m_LocalPosition: {x: 12.25, y: 4.32, z: -12.53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 732819609348912077}
   m_Father: {fileID: 6269620153155448819}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2162334646148192255
