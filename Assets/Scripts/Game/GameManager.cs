@@ -203,9 +203,67 @@ public class GameManager : MonoBehaviour
     // For global settings
     public void ForceAnomolyAll(int anomoly_index)
     {
-        for(int i = 0; i < createdFloor.Count ;i++)
+        int i = CurrentFloor;
+        int j = CurrentFloor-1;
+        while (true)
         {
-            createdFloor[i].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
+            if (i == 0 && j == createdFloor.Count - 1) break;
+            if (i > 0)
+            {
+                i--;
+                createdFloor[i].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
+            }
+
+            if (j < createdFloor.Count - 1)
+            {
+                j++;
+                createdFloor[j].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
+            }
+
+        }
+    }
+
+    public void ForceAnomolyAllExceptCurrent(int anomoly_index)
+    {
+        int i = CurrentFloor - 1;
+        int j = CurrentFloor - 1;
+        while(true)
+        {
+            if (i == 0 && j == createdFloor.Count-1) break;
+            if(i > 0)
+            {
+                i--;
+                createdFloor[i].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
+            }
+            
+            if(j < createdFloor.Count - 1)
+            {
+                j++;
+                createdFloor[j].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
+            }
+
+        }
+    }
+
+    public void ForceRestoreAllExceptCurrent()
+    {
+        int i = CurrentFloor - 1;
+        int j = CurrentFloor -1;
+        while (true)
+        {
+            if (i == 0 && j == createdFloor.Count - 1) break;
+            if (i > 0)
+            {
+                i--;
+                createdFloor[i].GetComponent<AnomolyManager>().ForceRestore();
+            }
+
+            if (j < createdFloor.Count - 1)
+            {
+                j++;
+                createdFloor[j].GetComponent<AnomolyManager>().ForceRestore();
+            }
+
         }
     }
 
