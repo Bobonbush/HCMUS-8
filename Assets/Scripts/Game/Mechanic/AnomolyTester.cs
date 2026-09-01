@@ -58,6 +58,7 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly32", "The NPC Chasing us" },
         { "Anomoly25", "Flip the whole floor" },
         { "Anomoly30", "NPC moves in a different trajectory" },
+        { "Anomoly33", "" },
     };
 
     private void Awake()
