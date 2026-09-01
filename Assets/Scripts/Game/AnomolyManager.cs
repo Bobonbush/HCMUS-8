@@ -110,7 +110,7 @@ public class AnomolyManager : MonoBehaviour
         
 
         int size = anomolies.Count;
-        int randomMize = Random.Range(0, 3);
+        int randomMize = Random.Range(0, size);
 
         
         if (anomolies[randomMize] is Anomoly anomoly)
