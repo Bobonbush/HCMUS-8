@@ -20,6 +20,7 @@ public class Anomoly32 : MonoBehaviour, Anomoly
     private NPCChasing chasing;
     private NPC npc;
 
+
     private void Awake()
     {
         npc = Agent.GetComponent<NPC>();
@@ -29,22 +30,30 @@ public class Anomoly32 : MonoBehaviour, Anomoly
 
     public void Evaluate()
     {
-
+        restored = false;
         defaultSpeed = npc.GetSpeed();
         trajectory.enabled = false;
         chasing.enabled = true;
         npc.SetSpeed(speed);
 
-        Invoke(nameof(EnableChase), 1.0f);
+        chasing.WaitForSeconds(4);
+
+        Invoke(nameof(EnableChase), 3.0f);
     }
 
+    bool restored = true;
     private void EnableChase()
     {
+        if(restored)
+        {
+            return;
+        }
         Agent.SetActive(true);
     }
 
     public void Restore()
     {
+        restored = true;
         npc.SetSpeed(defaultSpeed);
         trajectory.enabled = true;
         chasing.enabled = false;

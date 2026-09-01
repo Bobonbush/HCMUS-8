@@ -15,6 +15,7 @@ public class NPCChasing : NPCComponent
     {
         return npc.Agent.remainingDistance <= npc.Agent.stoppingDistance;
     }
+
     void Update()
     {
         timeIdle -= Time.deltaTime;
@@ -31,6 +32,11 @@ public class NPCChasing : NPCComponent
 
 
         SetDestination();
+    }
+
+    public void WaitForSeconds(float t)
+    {
+        timeIdle = t;
     }
 
     void SetDestination()

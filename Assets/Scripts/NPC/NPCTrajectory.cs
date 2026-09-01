@@ -4,9 +4,15 @@ using UnityEngine.AI;
 public class NPCTrajectory : NPCComponent
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    
     [SerializeField]
     List<Transform> points;
 
+
+
+    [SerializeField]
+    List<Transform> customPoints;
     int index = 0;
     private void Start()
     {
@@ -20,8 +26,24 @@ public class NPCTrajectory : NPCComponent
 
     void SetDestination()
     {
-        if (index >= points.Count) return;
-        Vector3 randomPoint = points[index].position;
+        if (index >= points.Count && customPoints.Count == 0) return;
+        if (index >= customPoints.Count && customPoints.Count != 0) return;
+        
+
+        // Last two points act as end and rotation.
+
+
+        Vector3 randomPoint = Vector3.zero;
+
+        if (customPoints.Count == 0)
+        {
+            randomPoint = points[index].position;
+        }else
+        {
+            randomPoint = customPoints[index].position;
+        }
+
+        
 
         NavMeshHit hit;
         Vector3 finalPosition = transform.position;
@@ -45,6 +67,14 @@ public class NPCTrajectory : NPCComponent
     public void Reset()
     {
         index = 0;
+        customPoints.Clear();
         //SetDestination();
+    }
+
+    public void MoveCustomPoints(List<Transform> _customPoints)
+    {
+        customPoints = _customPoints;
+        index = 0;
+        
     }
 }

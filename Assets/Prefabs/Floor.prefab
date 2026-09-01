@@ -18348,6 +18348,37 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &3816098432389391628
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8386578038548878181}
+  m_Layer: 0
+  m_Name: Anomoly Traj 1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8386578038548878181
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3816098432389391628}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 18.767, y: 0.38199997, z: -6.973}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6269620153155448819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3834332710825886312
 GameObject:
   m_ObjectHideFlags: 0
@@ -23311,11 +23342,15 @@ Transform:
   - {fileID: 6059110579823370166}
   - {fileID: 8610030135648211019}
   - {fileID: 4798948481714754052}
+  - {fileID: 2521536285195852528}
   - {fileID: 2458451122066658346}
   - {fileID: 8658313453407078877}
   - {fileID: 4159238881661873458}
   - {fileID: 6768901292037147182}
   - {fileID: 5531325062773152410}
+  - {fileID: 7690883808218621549}
+  - {fileID: 8386578038548878181}
+  - {fileID: 551424254622970266}
   - {fileID: 2598897009740423592}
   - {fileID: 158595137950858420}
   - {fileID: 6508239462722047831}
@@ -23393,6 +23428,7 @@ MonoBehaviour:
   - {fileID: 3912050435219173951}
   - {fileID: 4595351194450422913}
   - {fileID: 6008240094947249281}
+  - {fileID: 6447309935882617128}
 --- !u!1 &4908484232803264023
 GameObject:
   m_ObjectHideFlags: 0
@@ -31395,6 +31431,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.9590089, y: 0.8080351, z: 0.04251479}
   m_Center: {x: 5.260423, y: -1.3612169, z: -1.347737}
+--- !u!1 &6641478231361506575
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 551424254622970266}
+  m_Layer: 0
+  m_Name: Anomoly Traj 2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &551424254622970266
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6641478231361506575}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 18.68, y: 0.38199997, z: -6.46}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6269620153155448819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6674216544947197061
 GameObject:
   m_ObjectHideFlags: 0
@@ -34626,6 +34693,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &7336518841184409491
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7690883808218621549}
+  m_Layer: 0
+  m_Name: Anomoly Traj 3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7690883808218621549
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7336518841184409491}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 18.407, y: -0.12, z: -1.73}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6269620153155448819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7337577829881000014
 GameObject:
   m_ObjectHideFlags: 0
@@ -38987,6 +39085,57 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 5620737629421845558}
   m_maskType: 0
+--- !u!1 &8186968243682247729
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2521536285195852528}
+  - component: {fileID: 6447309935882617128}
+  m_Layer: 0
+  m_Name: 'Anomoly#30 '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2521536285195852528
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8186968243682247729}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.25, y: 4.32, z: -12.53}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6269620153155448819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6447309935882617128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8186968243682247729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8baea242bc868d74fa746ffe14fcf69a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anomoly30
+  Agent: {fileID: 1952973813062596167}
+  customPoints:
+  - {fileID: 2458451122066658346}
+  - {fileID: 8658313453407078877}
+  - {fileID: 7690883808218621549}
+  - {fileID: 8386578038548878181}
+  - {fileID: 551424254622970266}
 --- !u!1 &8193055969923157427
 GameObject:
   m_ObjectHideFlags: 0
@@ -51756,6 +51905,7 @@ MonoBehaviour:
   - {fileID: 4159238881661873458}
   - {fileID: 6768901292037147182}
   - {fileID: 5531325062773152410}
+  customPoints: []
 --- !u!114 &2395683069628268505
 MonoBehaviour:
   m_ObjectHideFlags: 0

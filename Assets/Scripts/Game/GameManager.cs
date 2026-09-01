@@ -14,11 +14,11 @@ public class GameManager : MonoBehaviour
 
     private int CurrentFloor = 4;
 
-    private int pFlip = 0;
-    
     private float offset = 5.664f;
     
     private int maxFloor = 12;
+
+    List<int> DecisionPoints = new List<int>(){ 1, 1 };
 
     List<GameObject> createdFloor = new List<GameObject>() ;
 
@@ -109,7 +109,29 @@ public class GameManager : MonoBehaviour
     private void NewMap()
     {
         // Generate Anomoly here
-        int dice = Random.Range(0, 5);
+        int total = 0;
+        for(int i = 0; i < DecisionPoints.Count; i++)
+        {
+            total += DecisionPoints[i];
+        }
+
+        int dice = 0;
+        int chosenPoint = Random.Range(0, total);
+        int chosenIndex = 0;
+        for(int i = 0; i < DecisionPoints.Count; i++)
+        {
+            if(chosenPoint < DecisionPoints[i])
+            {
+                chosenIndex = i;
+                break;
+            }
+            chosenPoint -= DecisionPoints[i];
+        }
+
+        DecisionPoints[chosenIndex] = 1;
+        DecisionPoints[chosenIndex ^ 1] += 1;
+
+        dice = chosenIndex;
 
 
         
