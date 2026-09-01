@@ -98,6 +98,50 @@ public class ElevatorSounds : MonoBehaviour
         }
     }
 
+    public bool RideInProgress { get { return stage != 0; } }
+
+    // Anomoly29 support: when the player is mirrored to the opposite cabin mid-ride,
+    // that cabin must take over the ride seamlessly - doors already shut, the same
+    // time left on the clock, the ding firing there - while this cabin quietly
+    // resets to its idle doors-open state. Otherwise the player materialises in an
+    // open, silent cabin and the illusion collapses.
+    public void AdoptRideFrom(ElevatorSounds source)
+    {
+        if (source == null || source == this || !source.RideInProgress) return;
+
+        stage = source.stage;
+        timer = source.timer;
+        travelDirection = source.travelDirection;
+        departed = source.departed;
+        if (cameraFeel == null) cameraFeel = source.cameraFeel;
+        doorsOpen = false;
+        SnapDoors(false);
+        if (block != null) block.enabled = true;
+
+        source.ResetToIdle();
+    }
+
+    private void ResetToIdle()
+    {
+        stage = 0;
+        timer = -1f;
+        travelDirection = 0f;
+        departed = false;
+        transform.localPosition = cabinBasePosition;
+        doorsOpen = true;
+        SnapDoors(true);
+        if (block != null) block.enabled = false;
+    }
+
+    // Put the leaves instantly at the open or closed pose (no sliding).
+    private void SnapDoors(bool open)
+    {
+        if (doorLeafA != null) doorLeafA.localPosition = open ? openA : closedA;
+        if (doorLeafB != null) doorLeafB.localPosition = open ? openB : closedB;
+        if (doorLeafA2 != null) doorLeafA2.localPosition = open ? openA2 : closedA2;
+        if (doorLeafB2 != null) doorLeafB2.localPosition = open ? openB2 : closedB2;
+    }
+
     // The leaves slide along the cabin model's z axis, expressed in the leaf's parent space.
     private Vector3 LocalSlideAxis(Transform leaf)
     {
