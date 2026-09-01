@@ -105,12 +105,12 @@ public class AnomolyManager : MonoBehaviour
 
 
 
-    public void GenerateAnomoly()
+    public int GenerateAnomoly(int prevv = -1)
     {
         
 
         int size = anomolies.Count;
-        int randomMize = Random.Range(0, size);
+        int randomMize = Random.Range(0, 3);
 
         
         if (anomolies[randomMize] is Anomoly anomoly)
@@ -133,6 +133,8 @@ public class AnomolyManager : MonoBehaviour
                 currentAnomoly.Evaluate();
             }
         }
+
+        return randomMize;
 
     }
 }

@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
     private int CurrentFloor = 4;
 
     private float offset = 5.664f;
+
+    private int prevAnomoly = -1;
     
     private int maxFloor = 12;
 
@@ -88,7 +90,7 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateAnomoly()
     {
-        createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().GenerateAnomoly();
+        prevAnomoly =  createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().GenerateAnomoly(prevAnomoly);
     }
 
     private void RestoreNPC()
@@ -105,10 +107,12 @@ public class GameManager : MonoBehaviour
         createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().ActiveNPC();
     }
 
-
+    private static int level = 0;
     private void NewMap()
     {
         // Generate Anomoly here
+
+        
         int total = 0;
         for(int i = 0; i < DecisionPoints.Count; i++)
         {
@@ -141,10 +145,13 @@ public class GameManager : MonoBehaviour
         if (dice == 0)
         {
             anomoly_flag = 0;
-        }else
+            prevAnomoly = -1;
+        }
+        else
         {
             EvaluateAnomoly();
             anomoly_flag = 1;
+            
         }
 
         EvaluateNPC();
