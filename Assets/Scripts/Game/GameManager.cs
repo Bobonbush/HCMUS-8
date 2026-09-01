@@ -13,10 +13,14 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     private int CurrentFloor = 4;
-    
+
     private float offset = 5.664f;
+
+    private int prevAnomoly = -1;
     
     private int maxFloor = 12;
+
+    List<int> DecisionPoints = new List<int>(){ 1, 1 };
 
     List<GameObject> createdFloor = new List<GameObject>() ;
 
@@ -24,6 +28,8 @@ public class GameManager : MonoBehaviour
     private int anomoly_flag = 0;
 
     private bool infinityMode = true;
+
+    private bool sleepQuery = false;
 
 
     private void Awake()
@@ -84,7 +90,7 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateAnomoly()
     {
-        createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().GenerateAnomoly();
+        prevAnomoly =  createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().GenerateAnomoly(prevAnomoly);
     }
 
     private void RestoreNPC()
@@ -94,33 +100,70 @@ public class GameManager : MonoBehaviour
 
     private void EvaluateNPC()
     {
+        if (createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().currentType == Anomoly.EvaluateType.NPCInvolve)
+        {
+            return;
+        }
         createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().ActiveNPC();
     }
 
-
+    private static int level = 0;
     private void NewMap()
     {
         // Generate Anomoly here
-        int dice = Random.Range(0, 5);
+
+        
+        int total = 0;
+        for(int i = 0; i < DecisionPoints.Count; i++)
+        {
+            total += DecisionPoints[i];
+        }
+
+        int dice = 0;
+        int chosenPoint = Random.Range(0, total);
+        int chosenIndex = 0;
+        for(int i = 0; i < DecisionPoints.Count; i++)
+        {
+            if(chosenPoint < DecisionPoints[i])
+            {
+                chosenIndex = i;
+                break;
+            }
+            chosenPoint -= DecisionPoints[i];
+        }
+
+        DecisionPoints[chosenIndex] = 1;
+        DecisionPoints[chosenIndex ^ 1] += 1;
+
+        dice = chosenIndex;
 
 
         
         if (AlwaysAnomoly) dice = 1;
 
-        EvaluateNPC();
+        
         if (dice == 0)
         {
             anomoly_flag = 0;
-        }else
+            prevAnomoly = -1;
+        }
+        else
         {
             EvaluateAnomoly();
             anomoly_flag = 1;
+            
         }
+
+        EvaluateNPC();
     }
 
     public void QueryEnter(int anomoly)
     {
-
+        if(sleepQuery)
+        {
+            sleepQuery = false;
+            return;
+        }
         RestoreAnomoly();
         RestoreNPC();
         
@@ -180,6 +223,22 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < createdFloor.Count; i++)
         {
             createdFloor[i].GetComponent<AnomolyManager>().ForceRestore();
+        }
+    }
+
+    public void Flip()
+    {
+        sleepQuery = true;
+        Transform floorTransform = createdFloor[CurrentFloor -1].transform;
+
+        floorTransform.localScale = new Vector3( - floorTransform.localScale.x, floorTransform.localScale.y, floorTransform.localScale.z);
+        if (floorTransform.localScale.x < 0.0f)
+        {
+            floorTransform.position = new Vector3(42.33f + (89.28f - 49.09616f), floorTransform.position.y, -99.65f);
+            
+        }else
+        {
+            floorTransform.position = new Vector3(42.33f, floorTransform.position.y, -99.65f);
         }
     }
 }

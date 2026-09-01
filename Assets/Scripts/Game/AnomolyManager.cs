@@ -15,6 +15,19 @@ public class AnomolyManager : MonoBehaviour
     
     public List<MonoBehaviour> anomolies;
 
+    private Anomoly.EvaluateType _currentType;
+
+    public Anomoly.EvaluateType currentType {
+        private set
+        {
+            _currentType = value;
+        }
+
+        get
+        {
+            return _currentType;
+        }
+    }
     /*
      *
      *   Anomly generator here
@@ -35,6 +48,7 @@ public class AnomolyManager : MonoBehaviour
 
     public void ActiveNPC()
     {
+        
         Invoke(nameof(EnableNPC), 3.0f);
 
     }
@@ -91,16 +105,18 @@ public class AnomolyManager : MonoBehaviour
 
 
 
-    public void GenerateAnomoly()
+    public int GenerateAnomoly(int prevv = -1)
     {
         
 
         int size = anomolies.Count;
-        int randomMize = Random.Range(0, size);
+        int randomMize = Random.Range(0, 3);
 
+        
         if (anomolies[randomMize] is Anomoly anomoly)
         {
-            
+
+            currentType = anomoly.getType();
             if (anomoly.getType() == Anomoly.EvaluateType.Global)
             {
                 GameManager.Instance.ForceAnomolyAll(randomMize);
@@ -117,6 +133,8 @@ public class AnomolyManager : MonoBehaviour
                 currentAnomoly.Evaluate();
             }
         }
+
+        return randomMize;
 
     }
 }

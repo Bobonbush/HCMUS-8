@@ -16,9 +16,6 @@ public class NPC : MonoBehaviour
 
     [HideInInspector]
     public Animator animator;
-
-    private Vector3 resetPosition = Vector3.zero;
-
     private NPCTrajectory trajectory;
 
 
@@ -31,7 +28,16 @@ public class NPC : MonoBehaviour
         Agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         trajectory = GetComponent<NPCTrajectory>();
-        resetPosition = transform.localPosition;
+    }
+
+    public void SetSpeed(float speed)
+    {
+        Agent.speed = speed;
+    }
+
+    public float GetSpeed()
+    {
+        return Agent.speed;
     }
 
     public void Reset()

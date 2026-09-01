@@ -11,9 +11,11 @@ public class Flickering : MonoBehaviour
 
 
     private float minIntenstity = 0.5f;
+
+    [SerializeField]
     private float maxIntensity = 25f;
 
-    private float flickerSpeed = 0.1f;
+    private float flickerSpeed = 0.4f;
 
     private float flickerTiming = 0.0f;
 
