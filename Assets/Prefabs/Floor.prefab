@@ -35701,7 +35701,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 18.442379, y: 3.8486366, z: 11.42379}
   m_Center: {x: -0.9123535, y: 1.4243207, z: 4.6825376}
@@ -35724,6 +35724,11 @@ MonoBehaviour:
   - {fileID: 4828149014517390654}
   - {fileID: 7078629172264686508}
   - {fileID: 1949445540557274799}
+  - {fileID: 6999299482693987181}
+  - {fileID: 7798132977817960213}
+  - {fileID: 5578982145142517197}
+  - {fileID: 955318242708415166}
+  - {fileID: 539509540007683382}
   AdditionalText: {fileID: 3609106617400252885}
   closeDoor: {fileID: 7027957463373947877}
   closeDoorTransform: {fileID: 9000918541982018448}
@@ -41366,7 +41371,7 @@ Light:
   m_InnerSpotAngle: 107.691055
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1

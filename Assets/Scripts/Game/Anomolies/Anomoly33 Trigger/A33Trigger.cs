@@ -1,7 +1,8 @@
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using System;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class A33Trigger : MonoBehaviour
 {
@@ -46,6 +47,8 @@ public class A33Trigger : MonoBehaviour
         TurnoffLight();
         time = 7.0f;
         ghost.SetActive(true);
+
+
     }
 
     private void Update()
@@ -83,20 +86,35 @@ public class A33Trigger : MonoBehaviour
     {
         LightColor = lightConditions[0].GetComponent<Light>().color;
         lightConditions[0].GetComponent<Light>().color = new Vector4(0.75f, 0.0f, 0.0f);
-        
-        foreach(LightCondition lightB in lightConditions)
+        bool skipFirst = false;
+        foreach (LightCondition lightB in lightConditions)
         {
+            if (skipFirst == false)
+            {
+                skipFirst = true;
+                continue;
+            }
             lightB.TurnOff();
         }
+
+        GameManager.Instance.ForceAnomolyAllExceptCurrent(1);
     }
 
     private void TurnonLight()
     {
         lightConditions[0].GetComponent<Light>().color = LightColor;
+        bool skipFirst = false;
         foreach (LightCondition lightB in lightConditions)
         {
+            if(skipFirst == false)
+            {
+                skipFirst = true;
+                continue;
+            }
             lightB.TurnOn();
         }
+
+        GameManager.Instance.ForceRestoreAllExceptCurrent();
 
     }
     private void OnTriggerEnter(Collider other)

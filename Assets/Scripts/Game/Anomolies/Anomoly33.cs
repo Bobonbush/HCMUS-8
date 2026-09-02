@@ -18,7 +18,7 @@ public class Anomoly33 : MonoBehaviour, Anomoly
     public void Evaluate()
     {
         trigger.enabled = true;
-        
+        trigger.GetComponent<BoxCollider>().enabled = true;
     }
 
 
@@ -29,6 +29,7 @@ public class Anomoly33 : MonoBehaviour, Anomoly
         {
             trigger.Restore();
             trigger.enabled = false;
+            trigger.GetComponent<BoxCollider>().enabled = false;
         }
     }
 

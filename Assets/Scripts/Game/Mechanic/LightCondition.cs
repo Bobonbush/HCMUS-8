@@ -10,20 +10,26 @@ public class LightCondition : MonoBehaviour
     private Light lightComponent;
     [SerializeField] private GameObject MeshLight;
 
+    private Flickering flicker;
+
 
     private void Awake()
     {
         lightComponent = GetComponent<Light>();
+        flicker = GetComponent<Flickering>();
     }
     
     public void TurnOff()
     {
+        flicker.enabled = false;
         lightComponent.enabled = false;
+
         MeshLight.SetActive(false);
     }
 
     public void TurnOn()
     {
+        flicker.enabled = true;
         lightComponent.enabled = true;
 
         MeshLight.SetActive(true);
