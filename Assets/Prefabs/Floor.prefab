@@ -54694,7 +54694,7 @@ PrefabInstance:
     - target: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a002a52f211eab64ea26362f76282b21, type: 2}
+      objectReference: {fileID: 2100000, guid: 5db33157de33ca54281c4d66bd10da7b, type: 2}
     - target: {fileID: 6454110592729052217, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -54706,8 +54706,38 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 65139011700856778}
   m_SourcePrefab: {fileID: 100100000, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+--- !u!23 &2782091191991011427 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 4159363542037260528}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3852951300628698529 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 4159363542037260528}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &65139011700856778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3852951300628698529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f1ff85b9e944134488baf69cf4bfdf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MirrorReflection
+  glassRenderer: {fileID: 2782091191991011427}
+  normalSource: {fileID: 4482135407251296027}
+  activeDistance: 9
+  textureHeight: 512
+  clipPlaneOffset: 0.01
 --- !u!4 &4482135407251296027 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
@@ -54846,7 +54876,7 @@ PrefabInstance:
     - target: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a002a52f211eab64ea26362f76282b21, type: 2}
+      objectReference: {fileID: 2100000, guid: 5db33157de33ca54281c4d66bd10da7b, type: 2}
     - target: {fileID: 6454110592729052217, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -54858,8 +54888,38 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5106457690668646686}
   m_SourcePrefab: {fileID: 100100000, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+--- !u!23 &2678340611736658988 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 4182048211224593599}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3947677070105295342 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 4182048211224593599}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5106457690668646686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3947677070105295342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f1ff85b9e944134488baf69cf4bfdf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MirrorReflection
+  glassRenderer: {fileID: 2678340611736658988}
+  normalSource: {fileID: 4432430222656463700}
+  activeDistance: 9
+  textureHeight: 512
+  clipPlaneOffset: 0.01
 --- !u!4 &4432430222656463700 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
@@ -56909,7 +56969,7 @@ PrefabInstance:
     - target: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a002a52f211eab64ea26362f76282b21, type: 2}
+      objectReference: {fileID: 2100000, guid: 5db33157de33ca54281c4d66bd10da7b, type: 2}
     - target: {fileID: 6454110592729052217, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -56921,11 +56981,41 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1715917755804328556}
   m_SourcePrefab: {fileID: 100100000, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
 --- !u!4 &5024932410543740583 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 4771172490870518092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5690286910400810013 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 4771172490870518092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1715917755804328556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5690286910400810013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f1ff85b9e944134488baf69cf4bfdf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MirrorReflection
+  glassRenderer: {fileID: 6707093713190556127}
+  normalSource: {fileID: 5024932410543740583}
+  activeDistance: 9
+  textureHeight: 512
+  clipPlaneOffset: 0.01
+--- !u!23 &6707093713190556127 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
   m_PrefabInstance: {fileID: 4771172490870518092}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4797204326042575090
@@ -62408,7 +62498,7 @@ PrefabInstance:
     - target: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a002a52f211eab64ea26362f76282b21, type: 2}
+      objectReference: {fileID: 2100000, guid: 5db33157de33ca54281c4d66bd10da7b, type: 2}
     - target: {fileID: 4255853583096722423, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
       propertyPath: m_LocalScale.y
       value: 1.0175
@@ -62428,8 +62518,38 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6864165745514799052}
   m_SourcePrefab: {fileID: 100100000, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+--- !u!23 &5151943892688119007 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2243635013235597459, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 6367420841145287756}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6097018841558120733 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
+  m_PrefabInstance: {fileID: 6367420841145287756}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6864165745514799052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6097018841558120733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f1ff85b9e944134488baf69cf4bfdf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MirrorReflection
+  glassRenderer: {fileID: 5151943892688119007}
+  normalSource: {fileID: 6906031407259132839}
+  activeDistance: 9
+  textureHeight: 512
+  clipPlaneOffset: 0.01
 --- !u!4 &6906031407259132839 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 40348960580d02e40964e27f35ae8ef4, type: 3}
