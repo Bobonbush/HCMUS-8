@@ -214,6 +214,12 @@ public class GameManager : MonoBehaviour
     public void ForceAnomoly(int add_up_floor, int anomoly_index)
     {
         int new_floor = CurrentFloor + add_up_floor;
+        // An AddUp anomaly needs a real neighbour floor to appear on. If the chosen
+        // side is past the 1..8 range (e.g. CurrentFloor pinned at 8 after a wrong
+        // answer, direction +1 -> floor 9), fall back to the opposite side instead
+        // of silently showing nothing. Since CurrentFloor is always 1..8, at least
+        // one neighbour is always valid.
+        if (new_floor < 1 || new_floor > 8) new_floor = CurrentFloor - add_up_floor;
         if (new_floor < 1 || new_floor > 8) return;
         createdFloor[new_floor - 1].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
     }
