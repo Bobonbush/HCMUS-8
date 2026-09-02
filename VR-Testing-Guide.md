@@ -1,84 +1,84 @@
-# Hướng dẫn test VR
+# VR Testing Guide
 
-Tài liệu này mô tả cách test phần VR của game **mà không cần kính thực tế ảo**, và những gì cần bật khi có kính thật.
+This document explains how to test the game's VR support **without a VR headset**, and what to enable once you have a real one.
 
-## Tổng quan phần VR đã có
+## What the VR support provides
 
-- **`VRRig`** (gắn trên object `Player` trong scene, `Mode = Auto`): tự phát hiện kính (HMD). Khi có HMD, nó tự động:
-  - chuyển camera sang chế độ tracking (thêm `TrackedPoseDriver`, camera nằm dưới node `VRTrackingOffset`);
-  - cho thân người đi theo đầu (body-follow-head, room-scale);
-  - thêm binding tay cầm VR lúc chạy và tạm khoá phím bàn phím;
-  - khi rút kính (ở chế độ Auto) thì khôi phục lại camera + bàn phím như cũ.
-- **OpenXR** được nhúng sẵn trong `Packages/com.unity.xr.openxr` (kèm XR Interaction Toolkit 3.6.0). Không cần cài thêm.
-- **Initialize XR on Startup = TẮT** (opt-in): nên chơi desktop bình thường KHÔNG bị ép vào VR. VR chỉ bật khi bạn chủ động khởi động (mock) hoặc cắm kính đã cấu hình.
+- **`VRRig`** (on the `Player` object in the scene, `Mode = Auto`): auto-detects a headset (HMD). When one is present it automatically:
+  - switches the camera to tracked mode (adds a `TrackedPoseDriver`, camera parented under a `VRTrackingOffset` node);
+  - makes the body follow the head (room-scale body-follow);
+  - adds the VR controller bindings at runtime and temporarily mutes the keyboard bindings;
+  - on headset loss (in Auto mode) restores the camera and keyboard exactly as before.
+- **OpenXR** is embedded in `Packages/com.unity.xr.openxr` (with XR Interaction Toolkit 3.6.0). Nothing extra to install.
+- **Initialize XR on Startup = OFF** (opt-in): normal desktop play is NOT forced into VR. VR only starts when you explicitly launch it (mock) or plug in a configured headset.
 
 ---
 
-## Cách 1 — Mock VR (stereo, KHÔNG cần kính) — xác nhận pipeline
+## Method 1 — Mock VR (stereo, NO headset) — verify the pipeline
 
-Dùng để kiểm tra nhanh: OpenXR khởi động được, HMD ảo xuất hiện, VRRig tự chuyển sang VR. **Không tương tác được** (Mock Runtime không có cảm biến chuyển động).
+Use this for a quick check: OpenXR initializes, a virtual HMD appears, and VRRig switches into VR. **You cannot interact** (the Mock Runtime has no motion sensors).
 
-1. Bấm **Play**.
+1. Press **Play**.
 2. Menu **`HCMUS/VR/Start Mock VR (stereo)`**.
-3. VRRig tự chuyển sang chế độ VR (camera gắn TrackedPoseDriver, thêm binding tay cầm).
-4. Xong thì **`HCMUS/VR/Stop Mock VR`** để tắt.
+3. VRRig switches into VR mode (camera gets a TrackedPoseDriver, VR controller bindings are added).
+4. When done, **`HCMUS/VR/Stop Mock VR`** to shut it down.
 
-> Menu này nằm ở `Assets/Scripts/Editor/MockVRMenu.cs`. Nó tự tắt XR Device Simulator trước khi khởi động để tránh hai nguồn head-pose tranh nhau.
+> This menu lives in `Assets/Scripts/Editor/MockVRMenu.cs`. It disables the XR Device Simulator first so two head-pose sources don't fight.
 
-**Kết quả mong đợi** (đã kiểm chứng): loader = OpenXRLoader, thiết bị `Head Tracking - OpenXR` xuất hiện, `controller.vrMode = true`, 4 binding VR được thêm, 10 binding bàn phím bị mute; Stop thì mọi thứ khôi phục sạch.
-
----
-
-## Cách 2 — XR Device Simulator (giả lập lắc đầu + tay cầm bằng chuột/phím)
-
-Đây là cách **"cảm nhận" VR gần nhất mà không cần kính** — bạn điều khiển đầu và hai tay cầm giả lập bằng chuột/bàn phím.
-
-1. Trong scene, tìm object **`XR Device Simulator`** (đang **tắt** mặc định) → **bật active** lên.
-2. Bấm **Play**.
-3. Điều khiển:
-   - Giữ **chuột phải + di chuột**: xoay đầu (nhìn quanh).
-   - **W/A/S/D**: di chuyển đầu/thân.
-   - Giữ **T** (hoặc **Y**): chuyển sang điều khiển tay trái / tay phải, rồi dùng chuột/phím để cử động tay đó.
-   - Panel hiển thị trên màn hình liệt kê đầy đủ phím.
-4. Camera sẽ xoay theo "đầu" giả lập → đây là lúc thấy VRRig chạy thật sự.
-
-> Nhớ **tắt lại** XR Device Simulator sau khi test để chơi desktop bình thường.
+**Expected result** (verified): loader = OpenXRLoader, a `Head Tracking - OpenXR` device appears, `controller.vrMode = true`, 4 VR bindings added, 10 keyboard bindings muted; Stop restores everything cleanly.
 
 ---
 
-## Cách 3 — Kính thật (Meta Quest, Vive, ...)
+## Method 2 — XR Device Simulator (simulate head + controllers with mouse/keyboard)
 
-Nhân lõi (head tracking + render stereo) chạy được ngay. **Nhưng tay cầm chưa bấm được** cho đến khi bật interaction profile đúng loại kính. Các bước:
+This is the **closest you can get to "feeling" VR without a headset** — you drive the simulated head and two controllers with the mouse and keyboard.
 
-1. **Project Settings → XR Plug-in Management → OpenXR** (tab PC/Standalone):
-   - **Tick interaction profile đúng loại kính** của bạn (ví dụ Meta Quest → *Oculus Touch Controller Profile* hoặc *Meta Quest Touch Pro Controller Profile*; HTC Vive → *HTC Vive Controller Profile*...). Các profile này đã cài sẵn, chỉ cần tick.
-   - **Bỏ tick `Mock Runtime`** (nó là feature dành cho test, có thể chặn runtime thật).
-2. **XR Plug-in Management → tick `Initialize XR on Startup`** (hiện đang tắt để chơi desktop). Hoặc để tắt và tự gọi khởi động XR trong code khi vào chế độ VR.
-3. Cắm kính, Build & Run (hoặc Play trong editor nếu có OpenXR runtime của kính trên máy).
+1. In the scene, find the **`XR Device Simulator`** object (**inactive** by default) → **enable it (set active)**.
+2. Press **Play**.
+3. Controls:
+   - Hold **right mouse + move mouse**: rotate the head (look around).
+   - **W/A/S/D**: move the head/body.
+   - Hold **T** (or **Y**): switch to controlling the left / right controller, then use the mouse/keys to move that hand.
+   - The on-screen panel lists every key.
+4. The camera rotates with the simulated "head" — this is where you see VRRig actually running.
 
-Sau 2 bước cấu hình trên là cắm kính chạy được: VRRig tự nhận HMD và chuyển sang VR.
+> Remember to **disable** the XR Device Simulator again after testing so desktop play works normally.
 
 ---
 
-## Bản đồ điều khiển VR (khi ở chế độ VR)
+## Method 3 — Real headset (Meta Quest, Vive, ...)
 
-| Hành động | Nút |
+The core (head tracking + stereo rendering) works right away. **But the controllers won't respond** until you enable the interaction profile for your headset. Steps:
+
+1. **Project Settings → XR Plug-in Management → OpenXR** (PC/Standalone tab):
+   - **Tick the interaction profile that matches your headset** (e.g. Meta Quest → *Oculus Touch Controller Profile* or *Meta Quest Touch Pro Controller Profile*; HTC Vive → *HTC Vive Controller Profile*, etc.). These profiles are already installed — just tick them.
+   - **Untick `Mock Runtime`** (it is a testing feature and can block the real runtime).
+2. **XR Plug-in Management → tick `Initialize XR on Startup`** (currently off for desktop play). Or leave it off and start XR from code when entering VR mode.
+3. Plug in the headset, Build & Run (or Play in the editor if the headset's OpenXR runtime is installed on the machine).
+
+After those two config steps, the headset works: VRRig detects the HMD and switches into VR automatically.
+
+---
+
+## VR control map (while in VR mode)
+
+| Action | Input |
 |---|---|
-| Di chuyển | Cần analog **tay trái** |
-| Chạy (sprint) | **Bấm** cần analog tay trái |
-| Nhảy | Nút **primary (A/X)** tay phải |
-| Tương tác | **Cò (trigger)** tay phải |
-| Xoay nhanh (snap turn) | Cần analog **tay phải** |
+| Move | **Left** thumbstick |
+| Sprint | **Click** the left thumbstick |
+| Jump | **Primary button (A/X)** on the right controller |
+| Interact | **Trigger** on the right controller |
+| Snap turn | **Right** thumbstick |
 
 ---
 
-## Xử lý sự cố
+## Troubleshooting
 
-- **Bật Mock VR mà không thấy gì đổi**: đảm bảo đang ở **Play mode** trước khi bấm menu; kiểm tra Console có dòng `MockVR: stereo session started`.
-- **Camera bị giật/hai nguồn head-pose**: đảm bảo chỉ một trong hai đang chạy — Mock VR **hoặc** XR Device Simulator, không bật cả hai (menu Mock VR đã tự tắt Simulator giúp).
-- **Chơi desktop mà bị ép vào VR**: kiểm tra `Initialize XR on Startup` đang **TẮT**.
-- **Tay cầm không phản hồi trên kính thật**: chưa tick interaction profile đúng loại kính (xem Cách 3, bước 1).
+- **Started Mock VR but nothing changed**: make sure you are in **Play mode** before using the menu; check the Console for `MockVR: stereo session started`.
+- **Camera stutters / two head-pose sources**: only one of the two may run at a time — Mock VR **or** the XR Device Simulator, never both (the Mock VR menu disables the Simulator for you).
+- **Desktop play gets forced into VR**: check that `Initialize XR on Startup` is **OFF**.
+- **Controllers unresponsive on a real headset**: the interaction profile for your headset isn't ticked (see Method 3, step 1).
 
 ---
 
-*Phần VR nằm trong lane của Khoa (movement/VR/anomalies/audio). File script chính: `Assets/Scripts/Player/VRRig.cs`, `Assets/Scripts/Editor/MockVRMenu.cs`.*
+*The VR work is in Khoa's lane (movement/VR/anomalies/audio). Main scripts: `Assets/Scripts/Player/VRRig.cs`, `Assets/Scripts/Editor/MockVRMenu.cs`.*
