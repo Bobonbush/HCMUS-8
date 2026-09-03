@@ -21,6 +21,8 @@ public class AnomolyTester : MonoBehaviour
     private bool active;
     private int step = -1;          // -1 = clean floor, nothing evaluated
     private string status = "";
+    private List<Step> cachedSteps;   // OnGUI fires several times per frame; never rebuild there
+    private GUIStyle labelStyle;
 
     private struct Step
     {
@@ -38,12 +40,12 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly04", "Room numbers turn to gibberish - check the green signs above classroom doors" },
         { "Anomoly05", "Go near the big classroom windows - something approaches the glass from the other side" },
         { "Anomoly14", "Someone at the bottom of the east stairwell, facing the corner" },
-        { "Anomoly16", "The ceiling presses down to just above your head" },
+        { "Anomoly16", "Walk and listen - footsteps follow yours, stopping one step late" },
         { "Anomoly23", "The clock runs backwards - wall between P.201 and P.202, watch the red hand" },
         { "Anomoly27", "Door P.203 sits crooked in its frame, with a gap at the edge" },
         { "Anomoly29", "Step into either lift - you will be swapped to the other one" },
         { "Anomoly07", "Classroom banner reads TPCS instead of APCS - above the chalkboard" },
-        { "Anomoly06", "Someone in the wall mirror - toilet, above the sinks" },
+        { "Anomoly06", "Approach the toilet mirror above the sinks - and brace yourself" },
         
         { "Anomoly20", "Someone hangs from the ceiling of the lit classroom" },
         { "Anomoly08", "Toilet keep blushing" },
@@ -59,6 +61,7 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly25", "Flip the whole floor" },
         { "Anomoly30", "NPC moves in a different trajectory" },
         { "Anomoly33", "" },
+        { "Anomoly09", "On a desk in the exam room: a pen hovers over the paper, writing by itself" },
     };
 
     private void Awake()
@@ -86,7 +89,7 @@ public class AnomolyTester : MonoBehaviour
 
     public void Next(int direction)
     {
-        List<Step> steps = BuildSteps();
+        List<Step> steps = cachedSteps = BuildSteps();
         if (steps.Count == 0) { status = "no AnomolyManager found"; return; }
 
         step = ((step + direction) % (steps.Count + 1) + steps.Count + 1) % (steps.Count + 1);
@@ -170,14 +173,18 @@ public class AnomolyTester : MonoBehaviour
     private void OnGUI()
     {
         if (!active) return;
-        List<Step> steps = BuildSteps();
-        string header = step >= 0 && step < steps.Count
+        List<Step> steps = cachedSteps;
+        string header = steps != null && step >= 0 && step < steps.Count
             ? "[" + (step + 1) + "/" + steps.Count + "] "
             : "";
         string text = "ANOMOLY TESTER   N: next | B: back | R: restore | F1: hide\n" + header + status;
 
-        GUIStyle style = new GUIStyle(GUI.skin.label) { fontSize = 16, richText = false };
-        style.normal.textColor = Color.white;
+        if (labelStyle == null)
+        {
+            labelStyle = new GUIStyle(GUI.skin.label) { fontSize = 16, richText = false };
+            labelStyle.normal.textColor = Color.white;
+        }
+        GUIStyle style = labelStyle;
         GUI.color = new Color(0f, 0f, 0f, 0.65f);
         GUI.DrawTexture(new Rect(8, 8, 660, 70), Texture2D.whiteTexture);
         GUI.color = Color.white;

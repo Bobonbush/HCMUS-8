@@ -39,6 +39,9 @@ public class A33Trigger : MonoBehaviour
         Triggered = true;
         closeDoorTransform.rotation = Quaternion.Euler(new Vector3(closeDoorTransform.rotation.x, -90.0f, closeDoorTransform.rotation.z));
         closeDoor.Play();
+        // The door banged shut hard enough to rattle the floor - kick the camera.
+        FirstPersonCameraFeel feel = FindFirstObjectByType<FirstPersonCameraFeel>();
+        if (feel != null) feel.SlamShake(1f);
         AdditionalText.SetActive(true);
         
         TurnoffLight();

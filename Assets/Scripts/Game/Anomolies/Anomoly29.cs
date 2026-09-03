@@ -1,9 +1,14 @@
 using UnityEngine;
 
 // You walk into the left lift and come out of the right one (or vice versa).
-// While active, the moment the player is inside a lift cabin they are mirrored
-// across the plane between the two cabins - unnoticeable from inside, and then
-// they step out of the wrong lift.
+//
+// The intended flow: the player boards a lift on floor n-1, which starts the ride
+// and evaluates floor n. If floor n rolls this anomaly, Evaluate() fires while the
+// player is still inside the cabin, Update() sees them there and mirrors them
+// across the plane between the two cabins - unnoticeable from inside - and the
+// opposite cabin adopts the ride in progress (doors shut, same timer, the arrival
+// ding plays there) while the boarded cabin quietly resets. When the doors open,
+// the player steps out of the wrong lift. That swap IS the anomaly to spot.
 //
 // Both LiftRoom trigger colliders are disabled around the swap and only re-enabled
 // once the player has left both boxes, so the mirror can never re-fire QueryEnter.
@@ -35,21 +40,29 @@ public class Anomoly29 : MonoBehaviour, Anomoly
         SetTriggersEnabled(true);
     }
 
+    private BoxCollider _boxA, _boxB;
+
     private void Update()
     {
+        // 12 floor instances run this every frame - bail before any real work unless
+        // this instance actually has something to do.
+        if (!active && !collidersDisabled) return;
         if (GameManager.Instance == null || liftTriggerA == null || liftTriggerB == null) return;
         Transform player = GameManager.Instance.GetPlayerTransform();
         if (player == null) return;
 
-        BoxCollider boxA = liftTriggerA.GetComponent<BoxCollider>();
-        BoxCollider boxB = liftTriggerB.GetComponent<BoxCollider>();
+        if (_boxA == null) _boxA = liftTriggerA.GetComponent<BoxCollider>();
+        if (_boxB == null) _boxB = liftTriggerB.GetComponent<BoxCollider>();
+        BoxCollider boxA = _boxA;
+        BoxCollider boxB = _boxB;
         if (boxA == null || boxB == null) return;
 
         // Grow the bounds a little so "outside" really means clear of the trigger.
         Bounds a = boxA.bounds; a.Expand(0.3f);
         Bounds b = boxB.bounds; b.Expand(0.3f);
         Vector3 probe = player.position + Vector3.up * 0.6f;
-        bool insideAny = a.Contains(probe) || b.Contains(probe);
+        bool insideA = a.Contains(probe);
+        bool insideAny = insideA || b.Contains(probe);
 
         // Re-arm the triggers once the player has walked clear of both cabins.
         if (collidersDisabled && !insideAny) SetTriggersEnabled(true);
@@ -82,7 +95,28 @@ public class Anomoly29 : MonoBehaviour, Anomoly
                 player.SetPositionAndRotation(pos, Quaternion.Euler(0f, yaw, 0f));
                 if (cc != null) cc.enabled = true;
             }
+
+            // Hand the ride over: the cabin the player boarded is mid-sequence
+            // (doors shut, ding pending); the cabin they now occupy must continue
+            // it so nothing looks or sounds out of place.
+            ElevatorSounds boarded = NearestCabin(insideA ? liftTriggerA.position : liftTriggerB.position);
+            ElevatorSounds destination = NearestCabin(insideA ? liftTriggerB.position : liftTriggerA.position);
+            if (destination != null) destination.AdoptRideFrom(boarded);
         }
+    }
+
+    // The cabin (ElevatorSounds) on this floor closest to a lift trigger.
+    private ElevatorSounds NearestCabin(Vector3 position)
+    {
+        Transform floorRoot = transform.parent != null ? transform.parent : transform;
+        ElevatorSounds best = null;
+        float bestDistance = float.MaxValue;
+        foreach (ElevatorSounds cabin in floorRoot.GetComponentsInChildren<ElevatorSounds>(true))
+        {
+            float d = (cabin.transform.position - position).sqrMagnitude;
+            if (d < bestDistance) { bestDistance = d; best = cabin; }
+        }
+        return best;
     }
 
     private void SetTriggersEnabled(bool on)

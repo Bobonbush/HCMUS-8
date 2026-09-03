@@ -190,6 +190,40 @@ public class FirstPersonCameraFeel : MonoBehaviour
 
     // ---------------------------------------------------------------- events
 
+    /// <summary>
+    /// Lets world systems kick the camera springs - the elevator uses this for its
+    /// departure and arrival jolts. Respects the player's Camera Shake setting.
+    /// </summary>
+    public void ExternalImpulse(float yVelocity, float pitchVelocity)
+    {
+        _springY.Impulse(yVelocity * shakeScale);
+        _springPitch.Impulse(pitchVelocity * shakeScale);
+    }
+
+    /// <summary>
+    /// A violent one-off slam: a hard hit followed by decaying aftershocks, like a
+    /// door banged shut hard enough to rattle the floor (Anomoly33 uses this).
+    /// Respects the player's Camera Shake setting.
+    /// </summary>
+    public void SlamShake(float strength = 1f)
+    {
+        if (!isActiveAndEnabled) return;   // VR mode parks this component
+        StartCoroutine(SlamShakeRoutine(strength));
+    }
+
+    System.Collections.IEnumerator SlamShakeRoutine(float s)
+    {
+        ExternalImpulse(-0.55f * s, 6f * s);
+        _springRoll.Impulse(1.5f * s * shakeScale);
+        yield return new WaitForSeconds(0.16f);
+        ExternalImpulse(0.24f * s, -2.8f * s);
+        _springRoll.Impulse(-0.9f * s * shakeScale);
+        yield return new WaitForSeconds(0.2f);
+        ExternalImpulse(-0.11f * s, 1.5f * s);
+        yield return new WaitForSeconds(0.22f);
+        ExternalImpulse(0.05f * s, -0.7f * s);
+    }
+
     void HandleFootstep(FirstPersonController.Foot foot, float intensity)
     {
         intensity *= shakeScale;

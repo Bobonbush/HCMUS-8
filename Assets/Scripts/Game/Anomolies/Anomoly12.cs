@@ -15,6 +15,10 @@ public class Anomoly12 : MonoBehaviour, Anomoly
     [Tooltip("The desks of the target classroom, wired by the setup tooling.")]
     public List<Transform> seats = new List<Transform>();
 
+    [Tooltip("The always-on exam sheets on these desks. Hidden while the desks are heaped " +
+             "(papers would not survive being shoved into a pile) and shown again on restore.")]
+    public GameObject examSheets;
+
     [Tooltip("Where the heap forms, in the classroom's local space. The middle of the desks.")]
     public Vector3 poolCentre;
 
@@ -48,6 +52,10 @@ public class Anomoly12 : MonoBehaviour, Anomoly
     public void Evaluate()
     {
         if (originalPositions.Count > 0) return;   // already piled, do not pile the pile
+
+        // The desks are about to be shoved into a heap; the loose exam sheets would be
+        // left floating where the desks used to be, so hide them for the duration.
+        if (examSheets != null) examSheets.SetActive(false);
 
         // How many fit in one layer of the disc before the heap has to grow upward.
         float step = Mathf.Max(0.05f, spacing);
@@ -102,6 +110,9 @@ public class Anomoly12 : MonoBehaviour, Anomoly
         }
         originalPositions.Clear();
         originalRotations.Clear();
+
+        // Desks back in place - the sheets belong on them again.
+        if (examSheets != null) examSheets.SetActive(true);
     }
 
     public Anomoly.EvaluateType getType()
