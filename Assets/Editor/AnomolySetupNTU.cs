@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-// Builds and wires anomolies 10, 12, 13, 18, 22, 24 and 26 into Floor.prefab.
+// Builds and wires anomolies 10, 12, 13, 18, 22, 24, 26 and 36 into Floor.prefab.
 //
 // This is the "setup tooling" the other anomolies refer to in their comments -
 // the anomoly scripts themselves never look anything up by name, every reference
@@ -123,6 +123,31 @@ public static class AnomolySetupNTU
     private static readonly Vector3 LogoEuler = new Vector3(0f, 180f, 0f);
     private static readonly Vector3 LogoScale = new Vector3(1.2f, 1.2f, 1f);
 
+    // The eyes on the vision sheet, for anomoly 36. Taken from where they are drawn
+    // in the 1448x2048 artwork - lens centres at pixel (410, 1180) and (1038, 1180) -
+    // and converted to metres across the printed sheet, so the irises land on the
+    // whites without anyone lining them up by eye in the Scene view.
+    private const float EyeAcross = 0.233047f;    // out from the sheet's centre line
+    private const float EyeRise = -0.115781f;     // down from its middle
+    private const float EyeSize = 0.106875f;      // the iris quad: 144px of the artwork
+
+    // How far off the sheet an iris floats, along the sheet's own forward. Established
+    // by looking, not by reasoning about which way the board faces - pushing the eyes
+    // the other way along that axis hides them behind the paper, which is exactly what
+    // happened the first time. Both eyes take the same value: a millimetre of disagreement
+    // between them leaves one coplanar with the sheet and flickering.
+    private const float EyeDepthOffset = -0.0026f;
+
+    // How far an iris may slide. The lens is an almond, so it pinches towards the
+    // corners: at this deflection the iris still clears the drawn lid by a few pixels,
+    // and much further than this it pokes straight through it.
+    private const float EyeTravelX = 0.052f;
+    private const float EyeTravelY = 0.0037f;
+
+    // A printed sheet, in metres.
+    private static readonly Vector2 PosterSize =
+        new Vector2(PosterHeightMetres * PosterAspect, PosterHeightMetres);
+
 
     [MenuItem("Tools/Anomoly Setup (NTU)")]
     public static void Run()
@@ -151,6 +176,7 @@ public static class AnomolySetupNTU
             Register(manager, BuildAnomoly22(floor));
             Register(manager, BuildAnomoly24(floor));
             Register(manager, BuildAnomoly26(floor));
+            Register(manager, BuildAnomoly36(floor));
 
             PrefabUtility.SaveAsPrefabAsset(floor, FloorPrefabPath);
             AssetDatabase.SaveAssets();
@@ -201,6 +227,16 @@ public static class AnomolySetupNTU
                 existing.localPosition = Vector3.Lerp(source.localPosition, other.localPosition,
                                                       k / (float)(ExtraPerGap + 1));
                 existing.gameObject.SetActive(false);
+
+                // The clones are decorative infill between real fixtures that already
+                // cast the corridor's shadows, so they add light without adding to the
+                // shadow atlas. Eight of the twenty are copies of shadow-casting lamps,
+                // and switching all twenty on would otherwise push the atlas into
+                // halving its resolution. Normalised every run, not just at creation, so
+                // a clone somebody edited by hand is repaired.
+                Light clonedLamp = existing.GetComponent<Light>();
+                if (clonedLamp != null) clonedLamp.shadows = LightShadows.None;
+
                 anomoly.extraLights.Add(existing.gameObject);
                 made++;
             }
@@ -407,28 +443,61 @@ public static class AnomolySetupNTU
         anomoly.anomolyMaterial = LoadMaterial("M_PosterUIT");
         anomoly.boardRenderers = new List<MeshRenderer>();
 
+        Vector3 anchor, normal, up, across;
+        if (!BoardBasis(floor, out anchor, out normal, out up, out across)) return anomoly;
+
+        // Three sheets, so the call for papers is one notice among several instead of
+        // the only thing on the board. A board holding a single sheet tells the player
+        // exactly what to inspect; a full board makes them choose.
+        MeshRenderer sheet = Pin(floor, "BoardPoster", anchor, normal, up,
+                                 Vector3.zero, PosterSize, anomoly.normalMaterial);
+        if (sheet != null) anomoly.boardRenderers.Add(sheet);
+        PinVisionSheet(floor);
+        Pin(floor, "BoardPosterSeminar", anchor, normal, up,
+            across * PosterStep, PosterSize, LoadMaterial("M_PosterSeminar"));
+
+        Debug.Log("Anomoly 22: three sheets on " + CorridorBoardName + ", centre at "
+                  + anchor + ", facing " + normal + ".");
+        return anomoly;
+    }
+
+    // The board's own frame: where a sheet hangs, which way it faces, which way is up
+    // and which way runs along it.
+    //
+    // Only the axes are derived - the offsets are written down as constants. Deriving
+    // the depth as well produced a different answer every time the bounds calculation
+    // changed, and the window that actually reads is narrow: 9cm too far and the sheet
+    // vanishes behind the wall. Keeping the axes derived still means the sheets follow
+    // the board if it is ever moved or turned.
+    private static bool BoardBasis(GameObject floor, out Vector3 anchor, out Vector3 normal,
+                                   out Vector3 up, out Vector3 across)
+    {
+        anchor = Vector3.zero;
+        normal = Vector3.forward;
+        up = Vector3.up;
+        across = Vector3.right;
+
         Transform room = floor.transform.Find(CorridorBoardRoom);
         Transform board = room != null ? room.Find(CorridorBoardName) : null;
         if (board == null)
         {
-            Debug.LogWarning("Anomoly 22: corridor board " + CorridorBoardRoom + "/" + CorridorBoardName + " not found.");
-            return anomoly;
+            Debug.LogWarning("Corridor board " + CorridorBoardRoom + "/" + CorridorBoardName + " not found.");
+            return false;
         }
 
         // Measure the board's first renderer - its flat panel - and nothing else.
         // Encapsulating every renderer pulls in the frame behind the panel, which
         // pushes the computed face about 9cm proud of the surface you actually pin to
-        // and leaves the posters floating inside the frame's depth.
+        // and leaves the sheets floating inside the frame's depth.
         Renderer panel = board.GetComponentInChildren<Renderer>();
         if (panel == null)
         {
-            Debug.LogWarning("Anomoly 22: the corridor board has no renderer to measure.");
-            return anomoly;
+            Debug.LogWarning("The corridor board has no renderer to measure.");
+            return false;
         }
 
-        // Derive the placement from the board itself rather than hardcoding
-        // coordinates. A board is a flat panel, so its thinnest bounds axis is the
-        // face normal, and the other two give the surface to pin the sheets to.
+        // A board is a flat panel, so its thinnest bounds axis is the face normal, and
+        // the other two give the surface to pin the sheets to.
         Bounds bounds = panel.bounds;
         int thin = 0;
         if (bounds.size.y < bounds.size[thin]) thin = 1;
@@ -438,30 +507,30 @@ public static class AnomolySetupNTU
         int upAxis = thin == 1 ? 2 : 1;
         int acrossAxis = thin == 0 ? 2 : 0;
 
-        Vector3 normal = Vector3.zero;
+        normal = Vector3.zero;
         normal[thin] = PosterFaceSign;
-        Vector3 up = Vector3.zero;
+        up = Vector3.zero;
         up[upAxis] = 1f;
-        Vector3 across = Vector3.zero;
+        across = Vector3.zero;
         across[acrossAxis] = 1f;
 
         // Anchored to the board's transform, not its bounds.
-        Vector3 anchor = board.position + up * PosterRise + normal * PosterDepth;
-        float posterHeight = PosterHeightMetres;
+        anchor = board.position + up * PosterRise + normal * PosterDepth;
+        return true;
+    }
 
-        // Three sheets, so the call for papers is one notice among several instead of
-        // the only thing on the board. A board holding a single sheet tells the player
-        // exactly what to inspect; a full board makes them choose.
-        anomoly.boardRenderers.Add(Pin(floor, "BoardPoster", anchor, normal, up,
-                                       Vector3.zero, posterHeight, anomoly.normalMaterial));
-        Pin(floor, "BoardPosterVision", anchor, normal, up,
-            across * -PosterStep, posterHeight, LoadMaterial("M_PosterVision"));
-        Pin(floor, "BoardPosterSeminar", anchor, normal, up,
-            across * PosterStep, posterHeight, LoadMaterial("M_PosterSeminar"));
+    // The left-hand sheet, the one drawn with the eyes. Shared, because anomoly 22
+    // hangs it and anomoly 36 needs its transform to know where those eyes are - and
+    // neither should have to run before the other. Pinning is derived and idempotent,
+    // so hanging it twice puts it in exactly the same place.
+    private static Transform PinVisionSheet(GameObject floor)
+    {
+        Vector3 anchor, normal, up, across;
+        if (!BoardBasis(floor, out anchor, out normal, out up, out across)) return null;
 
-        Debug.Log("Anomoly 22: three sheets on " + CorridorBoardName + ", centre at "
-                  + anchor + ", facing " + normal + ".");
-        return anomoly;
+        MeshRenderer sheet = Pin(floor, "BoardPosterVision", anchor, normal, up,
+                                 across * -PosterStep, PosterSize, LoadMaterial("M_PosterVision"));
+        return sheet != null ? sheet.transform : null;
     }
 
     // Places one sheet flat on the board face, offset sideways along it. Always
@@ -469,14 +538,14 @@ public static class AnomolySetupNTU
     // follow rather than staying where they were last put.
     private static MeshRenderer Pin(GameObject floor, string quadName, Vector3 anchor,
                                     Vector3 normal, Vector3 up, Vector3 offset,
-                                    float height, Material material)
+                                    Vector2 size, Material material)
     {
         GameObject quad = FindOrCreateQuad(floor, quadName);
         quad.transform.position = anchor + offset;
         // A quad's visible face is its local +Z, so forward has to be the outward
         // normal. Facing it the other way culls the sheet from the side you read it.
         quad.transform.rotation = Quaternion.LookRotation(normal, up);
-        quad.transform.localScale = new Vector3(height * PosterAspect, height, 1f);
+        quad.transform.localScale = new Vector3(size.x, size.y, 1f);
 
         MeshRenderer renderer = quad.GetComponent<MeshRenderer>();
         if (renderer != null && material != null) renderer.sharedMaterial = material;
@@ -527,6 +596,47 @@ public static class AnomolySetupNTU
         }
 
         Debug.Log("Anomoly 26: " + anomoly.fixtures.Count + " fixtures.");
+        return anomoly;
+    }
+
+    private static MonoBehaviour BuildAnomoly36(GameObject floor)
+    {
+        Anomoly36 anomoly = Host<Anomoly36>(floor, "Anomoly#36");
+        anomoly.eyes = new List<Transform>();
+        anomoly.travelX = EyeTravelX;
+        anomoly.travelY = EyeTravelY;
+
+        Transform sheet = PinVisionSheet(floor);
+        if (sheet == null)
+        {
+            Debug.LogWarning("Anomoly 36: no vision sheet to put eyes on.");
+            return anomoly;
+        }
+
+        // Placed off the sheet's own axes rather than the board's, so left stays left:
+        // a quad's +x is the artwork's +u whichever way the board ends up facing, while
+        // the board's "across" is just whichever world axis happened to be widest.
+        Material iris = LoadMaterial("M_IrisVision");
+        string[] names = { "BoardEyeLeft", "BoardEyeRight" };
+        for (int i = 0; i < names.Length; i++)
+        {
+            GameObject quad = FindOrCreateQuad(floor, names[i]);
+
+            // Always recomputed, like the sheets - the eyes are drawn on the paper, so
+            // they have to move with it rather than staying where they were last put.
+            quad.transform.rotation = sheet.rotation;
+            quad.transform.position = sheet.position
+                                    + sheet.right * (i == 0 ? -EyeAcross : EyeAcross)
+                                    + sheet.up * EyeRise
+                                    + sheet.forward * EyeDepthOffset;
+            quad.transform.localScale = new Vector3(EyeSize, EyeSize, 1f);
+
+            MeshRenderer renderer = quad.GetComponent<MeshRenderer>();
+            if (renderer != null && iris != null) renderer.sharedMaterial = iris;
+            anomoly.eyes.Add(quad.transform);
+        }
+
+        Debug.Log("Anomoly 36: two eyes on the vision sheet at " + sheet.position + ".");
         return anomoly;
     }
 

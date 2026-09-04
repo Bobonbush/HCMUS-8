@@ -62,6 +62,7 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly30", "NPC moves in a different trajectory" },
         { "Anomoly33", "" },
         { "Anomoly09", "On a desk in the exam room: a pen hovers over the paper, writing by itself" },
+        { "Anomoly36", "The eyes on the vision poster follow you - green board by the toilets" },
     };
 
     private void Awake()
