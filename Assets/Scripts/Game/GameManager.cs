@@ -111,6 +111,17 @@ public class GameManager : MonoBehaviour
     private static int level = 0;
     private void NewMap()
     {
+        // Manual testing owns anomaly selection; a hidden random anomaly must not
+        // run while the overlay says the floor is clean or another test is selected.
+        var tester = FindFirstObjectByType<AnomolyTester>();
+        if (tester != null && tester.IsActive)
+        {
+            ForceRestoreAll();
+            anomoly_flag = 0;
+            prevAnomoly = -1;
+            EvaluateNPC();
+            return;
+        }
         // Generate Anomoly here
 
         
@@ -324,5 +335,12 @@ public class GameManager : MonoBehaviour
     public int GetCurrentFloor()
     {
         return CurrentFloor;
+    }
+
+    public AnomolyManager GetCurrentAnomolyManager()
+    {
+        int index = CurrentFloor - 1;
+        return index >= 0 && index < createdFloor.Count
+            ? createdFloor[index].GetComponent<AnomolyManager>() : null;
     }
 }

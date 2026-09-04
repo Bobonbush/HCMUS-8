@@ -19,6 +19,7 @@ public class AnomolyTester : MonoBehaviour
     public bool startEnabled = true;
 
     private bool active;
+    public bool IsActive => active && isActiveAndEnabled;
     private int step = -1;          // -1 = clean floor, nothing evaluated
     private string status = "";
     private List<Step> cachedSteps;   // OnGUI fires several times per frame; never rebuild there
@@ -85,7 +86,7 @@ public class AnomolyTester : MonoBehaviour
         if (kb.f1Key.wasPressedThisFrame)
         {
             active = !active;
-            if (!active) RestoreAll();
+            RestoreAll();
             return;
         }
         if (!active) return;
@@ -164,18 +165,9 @@ public class AnomolyTester : MonoBehaviour
 
     private AnomolyManager FindPlayerFloorManager()
     {
-        if (GameManager.Instance == null) return null;
-        Transform player = GameManager.Instance.GetPlayerTransform();
-        if (player == null) return null;
-
-        AnomolyManager best = null;
-        float bestDistance = float.MaxValue;
-        foreach (AnomolyManager m in FindObjectsByType<AnomolyManager>(FindObjectsSortMode.None))
-        {
-            float d = Mathf.Abs(m.transform.position.y - player.position.y);
-            if (d < bestDistance) { bestDistance = d; best = m; }
-        }
-        return best;
+        // The authored scene floor can overlap a generated floor at the same height.
+        // Only the generated current floor participates in GameManager restoration.
+        return GameManager.Instance != null ? GameManager.Instance.GetCurrentAnomolyManager() : null;
     }
 
     private void OnGUI()

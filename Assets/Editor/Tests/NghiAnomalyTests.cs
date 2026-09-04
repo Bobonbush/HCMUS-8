@@ -8,6 +8,36 @@ public class NghiAnomalyTests
     private const string FloorPath = "Assets/Prefabs/Floor.prefab";
 
     [Test]
+    public void SwitchingAwayFromFollow_RestoresPatrolAndClearsFollowState()
+    {
+        GameObject floor = PrefabUtility.LoadPrefabContents(FloorPath);
+        try
+        {
+            var manager = floor.GetComponent<AnomolyManager>();
+            var follow = floor.GetComponentInChildren<Anomoly15>(true);
+            var patrol = follow.agentObject.GetComponent<NPCTrajectory>();
+            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            int index = manager.anomolies.IndexOf(follow);
+            manager.ForceAnomoly(index);
+            Assert.That((bool)typeof(Anomoly15).GetField("active", flags).GetValue(follow), Is.True);
+            // Reproduce the state after a close encounter, without needing a baked NavMesh.
+            typeof(Anomoly15).GetField("following", flags).SetValue(follow, true);
+            patrol.enabled = false;
+            var replacement = floor.AddComponent<NghiSelectionProbe>();
+            manager.anomolies.Add(replacement);
+            manager.ForceAnomoly(manager.anomolies.Count - 1);
+            Assert.That((bool)typeof(Anomoly15).GetField("active", flags).GetValue(follow), Is.False);
+            Assert.That((bool)typeof(Anomoly15).GetField("following", flags).GetValue(follow), Is.False);
+            Assert.That(patrol.enabled, Is.True);
+            Assert.That(follow.agentObject.GetComponent<NPCChasing>().enabled, Is.False);
+            Assert.That(manager.currentType, Is.EqualTo(Anomoly.EvaluateType.Single));
+            manager.ForceRestore();
+            Assert.That(replacement.restored, Is.True);
+        }
+        finally { PrefabUtility.UnloadPrefabContents(floor); }
+    }
+
+    [Test]
     public void FloorPrefab_HasEveryNghiAnomalyRegisteredAndWired()
     {
         // Test the saved prefab as-is; tests must never rebuild the user's placements.
@@ -125,4 +155,12 @@ public class NghiAnomalyTests
         Assert.That(manager.anomolies.Contains(component), Is.True, typeof(T).Name + " is not registered");
         Assert.That(referencesValid(component), Is.True, typeof(T).Name + " has missing setup references");
     }
+}
+
+public class NghiSelectionProbe : MonoBehaviour, Anomoly
+{
+    public bool restored;
+    public void Evaluate() { restored = false; }
+    public void Restore() { restored = true; }
+    public Anomoly.EvaluateType getType() => Anomoly.EvaluateType.Single;
 }
