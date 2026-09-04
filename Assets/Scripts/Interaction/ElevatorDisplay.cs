@@ -11,8 +11,10 @@ public class ElevatorDisplay : MonoBehaviour
     [SerializeField]
     private float timeMax = 2.0f;
 
+    [HideInInspector]
     public int setAnomoly = 0;
     int state = 0;
+    
     void Start()
     {
         text = GetComponent<TextMeshPro>();
@@ -30,7 +32,13 @@ public class ElevatorDisplay : MonoBehaviour
 
         state ^= 1;
 
-        text.text =  "" + (GameManager.Instance.GetCurrentFloor() + setAnomoly);
+        if (GameManager.Instance != null)
+        {
+            text.text = "" + (GameManager.Instance.GetCurrentFloor() + setAnomoly);
+        }else
+        {
+            text.text = "" + (8 + setAnomoly);
+        }
         text.enabled = (state > 0);
     }
 }

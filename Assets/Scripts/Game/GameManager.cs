@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
 
@@ -12,7 +13,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    private int CurrentFloor = 4;
+    private int CurrentFloor = 8;
 
     private float offset = 5.664f;
 
@@ -174,6 +175,7 @@ public class GameManager : MonoBehaviour
             {
                 
                 CurrentFloor--;
+                CheckEndGame();
             }
             
         }else
@@ -187,6 +189,14 @@ public class GameManager : MonoBehaviour
         NewMap();
 
 
+    }
+
+    private void CheckEndGame()
+    {
+        if(CurrentFloor == 0)
+        {
+            SceneManager.LoadScene("End");
+        }
     }
 
     void Update()
