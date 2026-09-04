@@ -10,7 +10,7 @@ public class NghiAnomalyTests
     [Test]
     public void FloorPrefab_HasEveryNghiAnomalyRegisteredAndWired()
     {
-        AnomolySetupNghi.Run();
+        // Test the saved prefab as-is; tests must never rebuild the user's placements.
         GameObject floor = PrefabUtility.LoadPrefabContents(FloorPath);
         try
         {

@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-// The floor's only NPC follows the player, but freezes whenever the player looks
-// at it. This uses the existing NavMeshAgent and does not allocate every frame.
+// Patrol normally until a close encounter, then follow at the same walking speed.
 public class Anomoly15 : MonoBehaviour, Anomoly
 {
     [Tooltip("The floor NPC managed by AnomolyManager.")]
     public GameObject agentObject;
-    public float followSpeed = 2.4f;
-    [Range(10f, 160f)] public float noticeAngle = 72f;
+    public float followSpeed = 1.75f;
+    [Min(0.1f)] public float detectionRadius = 3.5f;
+    private bool following;
     public float stoppingDistance = 1.7f;
     public float repathInterval = 0.2f;
 
@@ -23,6 +23,8 @@ public class Anomoly15 : MonoBehaviour, Anomoly
     private bool chasingWasEnabled;
     private float originalSpeed;
     private float originalStoppingDistance;
+    private bool originalStopped;
+    private UnityEngine.AI.NavMeshPath originalPath;
     private Vector3 originalPosition;
     private Quaternion originalRotation;
     private float nextRepath;
@@ -34,12 +36,12 @@ public class Anomoly15 : MonoBehaviour, Anomoly
         CaptureState();
         active = true;
         agentObject.SetActive(true);
-        if (trajectory != null) trajectory.enabled = false;
+        following = false;
+        if (trajectory != null) trajectory.enabled = true;
         if (chasing != null) chasing.enabled = false;
         if (navAgent != null)
         {
             navAgent.speed = followSpeed;
-            navAgent.stoppingDistance = stoppingDistance;
             if (navAgent.isOnNavMesh) navAgent.isStopped = false;
         }
         nextRepath = 0f;
@@ -48,6 +50,7 @@ public class Anomoly15 : MonoBehaviour, Anomoly
     public void Restore()
     {
         active = false;
+        following = false;
         if (agentObject == null || !captured) return;
         CacheComponents();
         if (navAgent != null)
@@ -55,8 +58,9 @@ public class Anomoly15 : MonoBehaviour, Anomoly
             if (navAgent.isOnNavMesh)
             {
                 navAgent.ResetPath();
-                navAgent.isStopped = true;
                 navAgent.Warp(originalPosition);
+                if (originalPath != null && originalPath.corners.Length > 1) navAgent.SetPath(originalPath);
+                navAgent.isStopped = originalStopped;
             }
             else agentObject.transform.position = originalPosition;
             navAgent.speed = originalSpeed;
@@ -78,16 +82,16 @@ public class Anomoly15 : MonoBehaviour, Anomoly
         CacheComponents();
         if (navAgent == null || !navAgent.enabled || !navAgent.isOnNavMesh) return;
 
-        Transform eyes = Camera.main != null ? Camera.main.transform : player;
-        Vector3 toNpc = agentObject.transform.position - eyes.position;
-        bool insideViewCone = Vector3.Angle(eyes.forward, toNpc) <= noticeAngle * 0.5f;
-        bool visible = insideViewCone && HasLineOfSight(eyes.position, toNpc);
-        if (visible)
+        navAgent.speed = followSpeed;
+        if (!following)
         {
-            navAgent.isStopped = true;
-            navAgent.ResetPath();
-            FacePlayer(player.position);
-            return;
+            Vector3 origin = agentObject.transform.position + Vector3.up;
+            Vector3 target = player.position + Vector3.up;
+            if ((player.position - agentObject.transform.position).sqrMagnitude > detectionRadius * detectionRadius
+                || !HasLineOfSight(target, origin - target)) return;
+            following = true;
+            if (trajectory != null) trajectory.enabled = false;
+            navAgent.stoppingDistance = stoppingDistance;
         }
 
         navAgent.isStopped = false;
@@ -106,14 +110,6 @@ public class Anomoly15 : MonoBehaviour, Anomoly
         if (!Physics.Raycast(eyePosition, toNpc / distance, out hit, distance, ~0, QueryTriggerInteraction.Ignore))
             return true;
         return hit.transform == agentObject.transform || hit.transform.IsChildOf(agentObject.transform);
-    }
-
-    private void FacePlayer(Vector3 playerPosition)
-    {
-        Vector3 direction = playerPosition - agentObject.transform.position;
-        direction.y = 0f;
-        if (direction.sqrMagnitude > 0.001f)
-            agentObject.transform.rotation = Quaternion.LookRotation(direction);
     }
 
     private void CacheComponents()
@@ -137,6 +133,8 @@ public class Anomoly15 : MonoBehaviour, Anomoly
         {
             originalSpeed = navAgent.speed;
             originalStoppingDistance = navAgent.stoppingDistance;
+            originalStopped = navAgent.isOnNavMesh && navAgent.isStopped;
+            originalPath = navAgent.isOnNavMesh && navAgent.hasPath ? navAgent.path : null;
         }
     }
 

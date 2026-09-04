@@ -62,12 +62,14 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly30", "NPC moves in a different trajectory" },
         { "Anomoly33", "" },
         { "Anomoly09", "On a desk in the exam room: a pen hovers over the paper, writing by itself" },
-        { "Anomoly34", "Extra CCTV cameras cover the corridor - compare walls and ceiling corners" },
-        { "Anomoly11", "The usual corridor rubbish bin has been replaced by a different model" },
-        { "Anomoly15", "The only NPC follows while outside your view and freezes when you look back" },
-        { "Anomoly19", "A body lies inside the men's toilet" },
-        { "Anomoly21", "Water rises slowly across the corridor and rooms over about 12 seconds" },
-        { "Anomoly28", "A pale face is pressed to the window nearest the toilets" },
+        { "Anomoly34", "CCTV follows at the edge of your vision; look directly at it to catch it looking away" },
+        { "Anomoly11", "The bin and bags are a flat photograph that turns to face you" },
+        { "Anomoly15", "Pass close to the patrolling NPC: it follows at the same walking speed, even when watched" },
+        { "Anomoly19", "A seated body waits beside the toilet" },
+        { "Anomoly21", "Water bursts from the toilets and rises above your head in eight seconds" },
+        { "Anomoly28", "A crowd of mismatched faces waits behind the window near the toilets" },
+        { "Anomoly17", "The same NPC now appears as a woman in a green dress" },
+        { "Anomoly35", "Look into the closed classroom: faces watch you, and more fall from its ceiling" },
     };
 
     private void Awake()
