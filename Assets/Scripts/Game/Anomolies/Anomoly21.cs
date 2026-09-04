@@ -1,73 +1,100 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
-// A shallow flood slowly rises across the floor instead of appearing instantly.
+// A delayed, shallow leak. This anomaly never submerges or damages the player.
 public class Anomoly21 : MonoBehaviour, Anomoly
 {
     public List<Transform> waterSurfaces = new List<Transform>();
-    public float riseHeight = 0.32f;
-    public float riseDuration = 12f;
-    private readonly Anomoly.EvaluateType type = Anomoly.EvaluateType.Single;
-    private readonly List<Vector3> startPositions = new List<Vector3>();
-    private Coroutine riseRoutine;
+    [Range(0, 0.04f)] public float riseHeight = 0.035f;
+    [Min(1)] public float riseDuration = 240f;
+    [Min(0)] public float onsetDelay = 18f;
+    [Min(0)] public float spreadSpeed = 0.028f;
+    [Min(0.1f)] public float maxSpreadRadius = 4.5f;
+    [Range(0, 0.002f)] public float rippleHeight = 0.0015f;
+    public List<ParticleSystem> toiletJets = new List<ParticleSystem>();
+    public AudioSource waterRoar;
+    readonly List<Vector3> startPositions = new List<Vector3>();
+    MaterialPropertyBlock waterProperties;
+    bool active;
+    float elapsed;
+    Camera view;
+    UniversalAdditionalCameraData cameraData;
+    CameraOverrideOption originalOpaque;
 
     public void Evaluate()
     {
-        CaptureStartPositions();
-        if (riseRoutine != null) StopCoroutine(riseRoutine);
+        if (active) return;
+        CaptureStartPositions(); elapsed = 0; active = true;
+        for (int i = 0; i < waterSurfaces.Count; i++) if (waterSurfaces[i] != null)
+        { waterSurfaces[i].localPosition = startPositions[i]; waterSurfaces[i].gameObject.SetActive(false); }
+    }
+    void AttachView(Camera camera)
+    {
+        DetachView(); view = camera;
+        if (view == null) return;
+        cameraData = view.GetUniversalAdditionalCameraData();
+        originalOpaque = cameraData.requiresColorOption;
+        cameraData.requiresColorOption = CameraOverrideOption.On;
+    }
+    void LateUpdate()
+    {
+        if (!active) return;
+        elapsed += Time.deltaTime;
+        float leakTime = Mathf.Max(0, elapsed - onsetDelay);
+        bool leaking = elapsed > onsetDelay;
+        float radius = Mathf.Min(maxSpreadRadius, 0.08f + leakTime * spreadSpeed);
+        // Hard cap also protects older scene overrides from the previous full-height flood.
+        float rise = Mathf.Clamp(riseHeight, 0, 0.04f) * Mathf.Clamp01(leakTime / Mathf.Max(1, riseDuration));
+        if (leaking && Application.isPlaying)
+        {
+            if (Camera.main != view) AttachView(Camera.main);
+            if (toiletJets.Count > 0 && toiletJets[0] != null && !toiletJets[0].gameObject.activeSelf)
+            { toiletJets[0].gameObject.SetActive(true); toiletJets[0].Play(); }
+            if (waterRoar != null && !waterRoar.isPlaying) waterRoar.Play();
+        }
         for (int i = 0; i < waterSurfaces.Count; i++)
         {
-            Transform surface = waterSurfaces[i];
-            if (surface == null) continue;
-            surface.localPosition = startPositions[i];
-            surface.gameObject.SetActive(true);
+            var surface = waterSurfaces[i]; if (surface == null) continue;
+            surface.position = surface.parent.TransformPoint(startPositions[i]) + Vector3.up * rise;
+            var renderer = surface.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                if (waterProperties == null) waterProperties = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(waterProperties);
+                var source = toiletJets.Count > 0 && toiletJets[0] != null ? toiletJets[0].transform.position : surface.position;
+                waterProperties.SetVector("_FloodSource", source);
+                waterProperties.SetFloat("_FloodRadius", leaking ? radius : 0);
+                waterProperties.SetFloat("_FloodDepth", rise);
+                waterProperties.SetFloat("_WaveHeight", Mathf.Clamp(rippleHeight, 0, 0.002f));
+                waterProperties.SetFloat("_FlowSpeed", 0.22f);
+                waterProperties.SetFloat("_FoamStrength", 0.025f);
+                renderer.SetPropertyBlock(waterProperties);
+            }
+            surface.gameObject.SetActive(leaking);
         }
-        riseRoutine = StartCoroutine(Rise());
     }
-
     public void Restore()
     {
-        if (riseRoutine != null)
-        {
-            StopCoroutine(riseRoutine);
-            riseRoutine = null;
-        }
-        CaptureStartPositions();
-        for (int i = 0; i < waterSurfaces.Count; i++)
-        {
-            Transform surface = waterSurfaces[i];
-            if (surface == null) continue;
-            surface.localPosition = startPositions[i];
-            surface.gameObject.SetActive(false);
-        }
+        active = false; elapsed = 0; CaptureStartPositions();
+        for (int i = 0; i < waterSurfaces.Count; i++) if (waterSurfaces[i] != null)
+        { waterSurfaces[i].localPosition = startPositions[i]; waterSurfaces[i].gameObject.SetActive(false); }
+        foreach (var jet in toiletJets) if (jet != null)
+        { jet.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); jet.gameObject.SetActive(false); }
+        if (waterRoar != null) waterRoar.Stop();
+        DetachView();
     }
-
-    private IEnumerator Rise()
+    void DetachView()
     {
-        float elapsed = 0f;
-        float duration = Mathf.Max(0.01f, riseDuration);
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-            for (int i = 0; i < waterSurfaces.Count; i++)
-            {
-                Transform surface = waterSurfaces[i];
-                if (surface != null) surface.localPosition = startPositions[i] + Vector3.up * (riseHeight * t);
-            }
-            yield return null;
-        }
-        riseRoutine = null;
+        if (cameraData != null) cameraData.requiresColorOption = originalOpaque;
+        view = null; cameraData = null;
     }
-
-    private void CaptureStartPositions()
+    void OnDisable() { Restore(); }
+    void CaptureStartPositions()
     {
         if (startPositions.Count == waterSurfaces.Count) return;
         startPositions.Clear();
-        foreach (Transform surface in waterSurfaces)
-            startPositions.Add(surface != null ? surface.localPosition : Vector3.zero);
+        foreach (var surface in waterSurfaces) startPositions.Add(surface != null ? surface.localPosition : Vector3.zero);
     }
-
-    public Anomoly.EvaluateType getType() { return type; }
+    public Anomoly.EvaluateType getType() => Anomoly.EvaluateType.Single;
 }

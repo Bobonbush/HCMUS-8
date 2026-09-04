@@ -21,8 +21,35 @@ Retrieved 2026-09-03 for non-commercial university coursework.
 
 ## Existing project model reused
 
+- `OnlineModels/NPCWoman.glb` — **Animated Woman**, Quaternius, CC0.
+  Source: https://poly.pizza/m/nIItLV9nxS
+  The idle/walk clips support #17. The final Death-animation frame is baked to
+  `CorpseDeathPose_*.asset` for #19, replacing the upright/T-pose zombie representation.
+
 - `Assets/Art/Characters/Zombie.obj` and its existing `M_Zombie` material are
   reused for the toilet corpse. This avoids introducing a mismatched cartoon model
   and keeps the anomaly consistent with the project's established horror assets.
 
 The PCCC poster source remains documented separately in `PCCC_Texture_Source.md`.
+
+- T_Nghi_BloodOrganic.png: AI-generated transparent blood-pool decal created with OpenAI image generation for anomaly #19. Used by M_Nghi_Blood on the BloodStain quad.
+
+## Refinement assets (2026-09-04)
+
+- `OnlineModels/SchoolTrashcan_Realistic.png`: generated with the built-in OpenAI image tool. Transparent photographic cutout, not a photograph obtained from a third-party catalogue. Prompt: "Create a photorealistic game sprite on genuinely transparent background: one battered green institutional school rubbish bin, full object visible front three-quarter view, dirty realistic plastic, overflowing crumpled refuse, two tied black trash bags on floor immediately beside bin. Uncanny lifelike photographic detail, neutral dim lighting without cast background, isolated alpha cutout, no text, no logos, no border. Entire group centered with margin, suitable for a camera-facing billboard in a horror corridor."
+- `CameraHead.asset` / `CameraMount.asset`: separated housing and bracket from the existing J-Toastie CC BY security camera above; retain that attribution.
+- `WaitingStudent_*.asset`: seated pose baked from the existing Quaternius CC0 Animated Woman rig; muted shirt and dark trousers. This remains a low-poly model, not a newly acquired photorealistic student scan.
+- `FloodRoar.wav`: original procedural noise/surge audio generated locally for this project; no third-party recording.
+- Flood, underwater and billboard shaders are project-authored. Face expression variation deforms individual copies of the existing attributed HeadRef mesh without modifying its source.
+
+## Anomaly 17 replacement (2026-09-04)
+
+- `Rocketbox/Female_Adult_13.fbx` and `f019_*` textures: Microsoft Rocketbox Avatar Library, Female Adult 13, MIT license. A gray vest, black shirt, jeans and boots replace the earlier green-dress visual.
+- `Rocketbox/f_walk_neutral.max.fbx` and `f_idle_breathe_01.max.fbx`: matching Rocketbox biped motions, MIT. `Walk.anim` and `Idle.anim` adapt matching bone rotations and vertical body motion to this avatar; horizontal travel remains controlled by the existing NPC NavMeshAgent. Animation cadence follows measured travel speed.
+- Source: https://github.com/microsoft/Microsoft-Rocketbox
+- License: `Rocketbox/LICENSE.md`. Retrieved 2026-09-04. The original model and texture assets are retained alongside the derived animation clips.
+- The Quaternius model remains in the project for the corpse assets; it is no longer the #17 appearance.
+
+## Slow leak revision (2026-09-04)
+
+Anomaly 21 now begins after 18 seconds. One bowl leaks into a local puddle, spreading at 0.028 m/s up to a 4.5 m radius. Depth approaches 0.035 m over 240 seconds and is hard-capped at 0.04 m in runtime code. Ripples are millimetres high, particles are small and sparse, and audio is quiet and audible only nearby. Underwater distortion, muffling and submersion logic were removed. Existing `Underwater` assets are unused by this anomaly.

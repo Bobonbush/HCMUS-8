@@ -8,7 +8,6 @@ using UnityEngine;
 // Repeatable setup for Nghi's anomaly batch. Missing decor is restored once;
 // existing decor children are never rebuilt so manual placement stays intact.
 // Existing anomaly objects and list entries are never replaced or reordered.
-[InitializeOnLoad]
 public static class AnomolySetupNghi
 {
     private const string FloorPrefabPath = "Assets/Prefabs/Floor.prefab";
@@ -33,8 +32,8 @@ public static class AnomolySetupNghi
 
     static AnomolySetupNghi()
     {
-        EditorApplication.delayCall += AutoRun;
-        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        // Never rebuild serialized placement automatically on another computer.
+        // Setup is an explicit editor-menu operation only.
     }
 
     private static void AutoRun()
@@ -285,8 +284,8 @@ public static class AnomolySetupNghi
         }
         water.gameObject.SetActive(false);
         anomoly.waterSurfaces = new List<Transform> { water };
-        anomoly.riseDuration = 12f;
-        anomoly.riseHeight = 0.30f;
+        anomoly.riseDuration = 240f;
+        anomoly.riseHeight = 0.035f;
         return anomoly;
     }
 
@@ -438,6 +437,17 @@ public static class AnomolySetupNghi
         AssetDatabase.Refresh();
         greenBinMaterial = Material("M_Nghi_SchoolBinGreen", new Color(0.04f, 0.33f, 0.10f), false, 0.05f, 0.34f);
         cardboardMaterial = Material("M_Nghi_CardboardPhoto", Color.white, true, 0f, 0.20f);
+        cardboardMaterial.SetFloat("_Cull", 0f);
+        cardboardMaterial.SetFloat("_AlphaClip", 1f);
+        cardboardMaterial.EnableKeyword("_ALPHATEST_ON");
+        cardboardMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        TextureImporter cutoutImporter = AssetImporter.GetAtPath(TrashCardboardPath) as TextureImporter;
+        if (cutoutImporter != null && (cutoutImporter.filterMode != FilterMode.Point || !cutoutImporter.alphaIsTransparency))
+        {
+            cutoutImporter.filterMode = FilterMode.Point;
+            cutoutImporter.alphaIsTransparency = true;
+            cutoutImporter.SaveAndReimport();
+        }
         decorFrameMaterial = Material("M_Nghi_PosterFrame", new Color(0.055f, 0.06f, 0.065f), false, 0.12f, 0.48f);
         Texture2D cardboardTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(TrashCardboardPath);
         if (cardboardTexture != null)
