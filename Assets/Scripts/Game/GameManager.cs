@@ -305,4 +305,9 @@ public class GameManager : MonoBehaviour
             floorTransform.position = new Vector3(42.33f, floorTransform.position.y, -99.65f);
         }
     }
+
+    public int GetCurrentFloor()
+    {
+        return CurrentFloor;
+    }
 }
