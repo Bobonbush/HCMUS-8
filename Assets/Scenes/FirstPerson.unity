@@ -2520,6 +2520,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 591812142155027228, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: spreadSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2363085340735113396, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
       propertyPath: MaxDistance
       value: 12
@@ -2532,6 +2536,22 @@ PrefabInstance:
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 367778413}
+    - target: {fileID: 2446984710273165529, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2446984710273165529, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2446984710273165529, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2446984710273165529, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3779840193972057710, guid: 864f2055bb5adfa478003cb76504efe4, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.25
