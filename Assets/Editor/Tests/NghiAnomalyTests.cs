@@ -23,7 +23,8 @@ public class NghiAnomalyTests
             AssertRegistered<Anomoly28>(floor, manager, a => a.windowFaces.Count > 0);
             AssertRegistered<Anomoly34>(floor, manager, a =>
                 a.extraCameras.Count >= 12 &&
-                a.extraCameras.Any(c => c != null && c.name.Contains("Bin_Peeking")) &&
+                a.extraCameras.All(c => c != null) &&
+                a.cameraHeads.Count == a.extraCameras.Count && a.cameraHeads.All(h => h != null) &&
                 a.extraCameras.Count(c => c != null && c.name.Contains("StairStep")) >= 3 &&
                 a.extraCameras.Count(c => c != null && c.name.Contains("RailingBird")) >= 2);
         }

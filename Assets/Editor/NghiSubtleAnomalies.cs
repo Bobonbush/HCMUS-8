@@ -92,8 +92,10 @@ public static class NghiSubtleAnomalies
         EditorUtility.SetDirty(mat); return mat;
     }
     static AnimationClip Motion(string sourceName, string name, GameObject model, List<string> log)
+        => RetargetMotion(Root + sourceName, Root + name + ".anim", name, model, log);
+    public static AnimationClip RetargetMotion(string sourcePath, string path, string name, GameObject model, List<string> log)
     {
-        var source = AssetDatabase.LoadAllAssetsAtPath(Root + sourceName).OfType<AnimationClip>().First(c=>!c.name.StartsWith("__"));
+        var source = AssetDatabase.LoadAllAssetsAtPath(sourcePath).OfType<AnimationClip>().First(c=>!c.name.StartsWith("__"));
         var clip = new AnimationClip { name=name, legacy=true, wrapMode=WrapMode.Loop, frameRate=source.frameRate };
         int count=0;
         foreach (var binding in AnimationUtility.GetCurveBindings(source))
@@ -116,7 +118,6 @@ public static class NghiSubtleAnomalies
             count++;
         }
         clip.EnsureQuaternionContinuity();
-        string path = Root + name + ".anim";
         var existing = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
         if (existing == null) AssetDatabase.CreateAsset(clip,path);
         else { EditorUtility.CopySerialized(clip,existing); Object.DestroyImmediate(clip); clip=existing; }
@@ -124,7 +125,7 @@ public static class NghiSubtleAnomalies
         if(count < 100) throw new Exception("Motion is not bound to the avatar");
         return clip;
     }
-    static float MeasureStride(GameObject model, AnimationClip clip, List<string> log)
+    public static float MeasureStride(GameObject model, AnimationClip clip, List<string> log)
     {
         var feet=model.GetComponentsInChildren<Transform>(true).Where(t=>t.name=="Bip01 L Foot" || t.name=="Bip01 R Foot").ToArray();
         var samples=new List<Vector3[]>();
@@ -153,9 +154,8 @@ public static class NghiSubtleAnomalies
     }
     static void ValidateLeak(Anomoly21 a, List<string> log)
     {
-        var source = a.waterSurfaces[0].InverseTransformPoint(a.toiletJets[0].transform.position);
-        if (Mathf.Abs(source.x)>0.01f || Mathf.Abs(source.z)>0.01f) throw new Exception("Puddle is not centred on leaking bowl");
-        log.Add("PASS: water footprint begins at bowl, not corridor edge");
+        if (a.restroomExit==null) throw new Exception("Missing restroom-to-hall flow anchor");
+        log.Add("PASS: restroom-to-hall flow anchor assigned");
         var elapsed=typeof(Anomoly21).GetField("elapsed",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
         var update=typeof(Anomoly21).GetMethod("LateUpdate",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
         a.Evaluate();
@@ -171,19 +171,19 @@ public static class NghiSubtleAnomalies
         if(a.waterSurfaces.Any(t=>t.gameObject.activeSelf)) throw new Exception("Leak failed restore");
         if(ShaderUtil.ShaderHasError(a.waterSurfaces[0].GetComponent<Renderer>().sharedMaterial.shader)) throw new Exception("Water shader error");
     }
-    static Bounds BoundsOf(GameObject root)
+    public static Bounds BoundsOf(GameObject root)
     {
         var rs=root.GetComponentsInChildren<Renderer>(true); var b=rs[0].bounds;
         foreach(var r in rs.Skip(1))b.Encapsulate(r.bounds); return b;
     }
-    static void Preview(GameObject source, AnimationClip clip, string name, float time)
+    public static void Preview(GameObject source, AnimationClip clip, string name, float time, string modelName = "WomanModel")
     {
         var scene=EditorSceneManager.NewPreviewScene(); var rt=new RenderTexture(600,800,24); var old=RenderTexture.active;
         try
         {
             var copy=Object.Instantiate(source); UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(copy,scene);
             copy.SetActive(true); copy.transform.position=Vector3.zero; copy.transform.rotation=Quaternion.identity;
-            clip.SampleAnimation(copy.transform.Find("WomanModel").gameObject,time);
+            clip.SampleAnimation(copy.transform.Find(modelName).gameObject,time);
             var b=BoundsOf(copy);
             var go=new GameObject("Preview camera"); UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go,scene);
             var camera=go.AddComponent<Camera>(); camera.scene=scene; camera.cameraType=CameraType.Preview;

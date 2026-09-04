@@ -160,6 +160,7 @@ public class GameManager : MonoBehaviour
 
     public void QueryEnter(int anomoly)
     {
+        if (CurrentFloor == 0) return;
         if(sleepQuery)
         {
             sleepQuery = false;
@@ -175,7 +176,8 @@ public class GameManager : MonoBehaviour
             {
                 
                 CurrentFloor--;
-                CheckEndGame();
+                // Loading End must finish this query before NewMap indexes floor -1.
+                if (CheckEndGame()) return;
             }
             
         }else
@@ -191,12 +193,15 @@ public class GameManager : MonoBehaviour
 
     }
 
-    private void CheckEndGame()
+    private bool CheckEndGame()
     {
         if(CurrentFloor == 0)
         {
+            enabled = false;
             SceneManager.LoadScene("End");
+            return true;
         }
+        return false;
     }
 
     void Update()

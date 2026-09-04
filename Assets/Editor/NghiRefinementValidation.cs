@@ -47,7 +47,7 @@ public static class NghiRefinementValidation
             });
             check("Flood shader and references",()=>{
                 var a=floor.GetComponentInChildren<Anomoly21>(true);
-                Require(a.riseHeight<=0.04f && a.riseDuration>=240 && a.onsetDelay>=15 && a.spreadSpeed<=0.03f,"Subtle leak defaults");
+                Require(a.riseHeight<=0.04f && a.riseDuration>=150 && a.restroomExit!=null && a.spreadSpeed>=0.1f,"Shallow hallway seep defaults");
                 Require(a.toiletJets.Count>0&&a.waterRoar.clip!=null,"Missing effects");
                 Require(!ShaderUtil.ShaderHasError(a.waterSurfaces[0].GetComponent<Renderer>().sharedMaterial.shader),"Water shader error");
             });

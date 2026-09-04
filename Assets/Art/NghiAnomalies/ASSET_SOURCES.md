@@ -53,3 +53,10 @@ The PCCC poster source remains documented separately in `PCCC_Texture_Source.md`
 ## Slow leak revision (2026-09-04)
 
 Anomaly 21 now begins after 18 seconds. One bowl leaks into a local puddle, spreading at 0.028 m/s up to a 4.5 m radius. Depth approaches 0.035 m over 240 seconds and is hard-capped at 0.04 m in runtime code. Ripples are millimetres high, particles are small and sparse, and audio is quiet and audible only nearby. Underwater distortion, muffling and submersion logic were removed. Existing `Underwater` assets are unused by this anomaly.
+
+## Main teacher and hallway seep (2026-09-04)
+
+- `Rocketbox/Teacher/Male_Adult_08.fbx`, `m014_*` textures, `m_walk_neutral.max.fbx`, and `m_idle_breathe_01.max.fbx` come from the Microsoft Rocketbox Avatar Library under MIT. Source: https://github.com/microsoft/Microsoft-Rocketbox. The license is retained in `Rocketbox/LICENSE.md`.
+- `TeacherBuild.asset` is derived from that avatar with a modestly fuller waist and rounded abdomen. Clothing remains a light blue collared shirt, dark trousers and ordinary shoes. `Teacher/Idle.anim` and `Teacher/Walk.anim` use the matching male biped rotations, with navigation-controlled translation and speed-matched cadence.
+- The normal NPC keeps its original navigation/collider/root references. The robot renderers are disabled; anomaly #17 swaps only the teacher renderers for the existing female appearance and restores them afterward.
+- This hallway seep revision supersedes the earlier slow-leak timing above: onset 8 seconds, flow-front travel 0.14 m/s, maximum travel 12 m, default rise 3.5 cm over 150 seconds. The flow routes through an authored restroom exit before widening along the hallway; the advancing edge uses layered spatial noise. Hall geometry limits the wet footprint. There is still no submersion or drowning logic.

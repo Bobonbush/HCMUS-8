@@ -7,10 +7,15 @@ public class Anomoly21 : MonoBehaviour, Anomoly
 {
     public List<Transform> waterSurfaces = new List<Transform>();
     [Range(0, 0.04f)] public float riseHeight = 0.035f;
-    [Min(1)] public float riseDuration = 240f;
-    [Min(0)] public float onsetDelay = 18f;
-    [Min(0)] public float spreadSpeed = 0.028f;
-    [Min(0.1f)] public float maxSpreadRadius = 4.5f;
+    [Min(1)] public float riseDuration = 150f;
+    [Min(0)] public float onsetDelay = 8f;
+    [Min(0)] public float spreadSpeed = 0.14f;
+    [Min(0.1f)] public float maxSpreadRadius = 12f;
+    [Tooltip("Forward points out of the restroom; right runs along the hallway.")]
+    public Transform restroomExit;
+    public Vector4 roomLimits = new Vector4(-.95f, 2.1f, -5.8f, .15f);
+    public Vector4 hallLimits = new Vector4(-.95f, 9f, -.15f, 3.7f);
+    [Min(0.1f)] public float doorwayWidth = 1.2f;
     [Range(0, 0.002f)] public float rippleHeight = 0.0015f;
     public List<ParticleSystem> toiletJets = new List<ParticleSystem>();
     public AudioSource waterRoar;
@@ -65,6 +70,16 @@ public class Anomoly21 : MonoBehaviour, Anomoly
                 var source = toiletJets.Count > 0 && toiletJets[0] != null ? toiletJets[0].transform.position : surface.position;
                 waterProperties.SetVector("_FloodSource", source);
                 waterProperties.SetFloat("_FloodRadius", leaking ? radius : 0);
+                waterProperties.SetFloat("_UseDoorway", restroomExit != null ? 1 : 0);
+                if (restroomExit != null)
+                {
+                    waterProperties.SetVector("_Exit", restroomExit.position);
+                    waterProperties.SetVector("_HallAxis", restroomExit.right);
+                    waterProperties.SetVector("_Outward", restroomExit.forward);
+                    waterProperties.SetVector("_RoomLimits", roomLimits);
+                    waterProperties.SetVector("_HallLimits", hallLimits);
+                    waterProperties.SetFloat("_DoorHalfWidth", doorwayWidth * 0.5f);
+                }
                 waterProperties.SetFloat("_FloodDepth", rise);
                 waterProperties.SetFloat("_WaveHeight", Mathf.Clamp(rippleHeight, 0, 0.002f));
                 waterProperties.SetFloat("_FlowSpeed", 0.22f);

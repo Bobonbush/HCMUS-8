@@ -206,6 +206,7 @@ public static class NghiAnomalyRefinement
         }
         a.waterRoar.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(Art+"FloodRoar.wav");
         a.waterRoar.loop=true; a.waterRoar.playOnAwake=false; a.waterRoar.spatialBlend=1f; a.waterRoar.volume=0.08f; a.waterRoar.minDistance=0.5f; a.waterRoar.maxDistance=5;
+        NghiHallLeakSetup.Configure(floor);
     }
     static void Faces(GameObject floor)
     {
