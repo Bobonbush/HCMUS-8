@@ -19,6 +19,7 @@ public class AnomolyTester : MonoBehaviour
     public bool startEnabled = true;
 
     private bool active;
+    public bool IsActive => active && isActiveAndEnabled;
     private int step = -1;          // -1 = clean floor, nothing evaluated
     private string status = "";
     private List<Step> cachedSteps;   // OnGUI fires several times per frame; never rebuild there
@@ -62,6 +63,14 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly30", "NPC moves in a different trajectory" },
         { "Anomoly33", "" },
         { "Anomoly09", "On a desk in the exam room: a pen hovers over the paper, writing by itself" },
+        { "Anomoly34", "School cameras slowly follow you; the elevator camera stays fixed" },
+        { "Anomoly11", "The bin and bags are a flat photograph that turns to face you" },
+        { "Anomoly15", "Pass close to the patrolling NPC: it follows at the same walking speed, even when watched" },
+        { "Anomoly19", "A seated body waits beside the toilet" },
+        { "Anomoly21", "Water creeps through the restroom exit after ~35 seconds and spreads along the hall; it stays shallow" },
+        { "Anomoly28", "A crowd of mismatched faces waits behind the window near the toilets" },
+        { "Anomoly17", "The same NPC appears as a woman in a gray vest and jeans, with a speed-matched walking gait" },
+        { "Anomoly35", "Look into the closed classroom: faces watch you, and more fall from its ceiling" },
         { "Anomoly36", "The eyes on the vision poster follow you - green board by the toilets" },
     };
 
@@ -78,7 +87,7 @@ public class AnomolyTester : MonoBehaviour
         if (kb.f1Key.wasPressedThisFrame)
         {
             active = !active;
-            if (!active) RestoreAll();
+            RestoreAll();
             return;
         }
         if (!active) return;
@@ -157,18 +166,9 @@ public class AnomolyTester : MonoBehaviour
 
     private AnomolyManager FindPlayerFloorManager()
     {
-        if (GameManager.Instance == null) return null;
-        Transform player = GameManager.Instance.GetPlayerTransform();
-        if (player == null) return null;
-
-        AnomolyManager best = null;
-        float bestDistance = float.MaxValue;
-        foreach (AnomolyManager m in FindObjectsByType<AnomolyManager>(FindObjectsSortMode.None))
-        {
-            float d = Mathf.Abs(m.transform.position.y - player.position.y);
-            if (d < bestDistance) { bestDistance = d; best = m; }
-        }
-        return best;
+        // The authored scene floor can overlap a generated floor at the same height.
+        // Only the generated current floor participates in GameManager restoration.
+        return GameManager.Instance != null ? GameManager.Instance.GetCurrentAnomolyManager() : null;
     }
 
     private void OnGUI()

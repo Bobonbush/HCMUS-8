@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
 
@@ -12,7 +13,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    private int CurrentFloor = 4;
+    private int CurrentFloor = 8;
 
     private float offset = 5.664f;
 
@@ -110,6 +111,17 @@ public class GameManager : MonoBehaviour
     private static int level = 0;
     private void NewMap()
     {
+        // Manual testing owns anomaly selection; a hidden random anomaly must not
+        // run while the overlay says the floor is clean or another test is selected.
+        var tester = FindFirstObjectByType<AnomolyTester>();
+        if (tester != null && tester.IsActive)
+        {
+            ForceRestoreAll();
+            anomoly_flag = 0;
+            prevAnomoly = -1;
+            EvaluateNPC();
+            return;
+        }
         // Generate Anomoly here
 
         
@@ -159,6 +171,7 @@ public class GameManager : MonoBehaviour
 
     public void QueryEnter(int anomoly)
     {
+        if (CurrentFloor == 0) return;
         if(sleepQuery)
         {
             sleepQuery = false;
@@ -174,6 +187,8 @@ public class GameManager : MonoBehaviour
             {
                 
                 CurrentFloor--;
+                // Loading End must finish this query before NewMap indexes floor -1.
+                if (CheckEndGame()) return;
             }
             
         }else
@@ -187,6 +202,17 @@ public class GameManager : MonoBehaviour
         NewMap();
 
 
+    }
+
+    private bool CheckEndGame()
+    {
+        if(CurrentFloor == 0)
+        {
+            enabled = false;
+            SceneManager.LoadScene("End");
+            return true;
+        }
+        return false;
     }
 
     void Update()
@@ -304,5 +330,17 @@ public class GameManager : MonoBehaviour
         {
             floorTransform.position = new Vector3(42.33f, floorTransform.position.y, -99.65f);
         }
+    }
+
+    public int GetCurrentFloor()
+    {
+        return CurrentFloor;
+    }
+
+    public AnomolyManager GetCurrentAnomolyManager()
+    {
+        int index = CurrentFloor - 1;
+        return index >= 0 && index < createdFloor.Count
+            ? createdFloor[index].GetComponent<AnomolyManager>() : null;
     }
 }

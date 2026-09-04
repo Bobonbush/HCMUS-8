@@ -78,6 +78,7 @@ public class AnomolyManager : MonoBehaviour
         {
             currentAnomoly.Restore();
             currentAnomoly = null;
+            currentType = Anomoly.EvaluateType.Single;
         }
 
 
@@ -90,16 +91,17 @@ public class AnomolyManager : MonoBehaviour
             currentAnomoly.Restore();
             currentAnomoly = null;
         }
+        currentType = Anomoly.EvaluateType.Single;
     }
 
 
 
     public void ForceAnomoly(int index) {
-
-        if (anomolies[index] is Anomoly anomoly)
-        {
-            currentAnomoly = anomoly;
-        }
+        if (index < 0 || index >= anomolies.Count || !(anomolies[index] is Anomoly anomoly)) return;
+        // Never lose the reference to a still-running follow/chase anomaly.
+        ForceRestore();
+        currentAnomoly = anomoly;
+        currentType = anomoly.getType();
         currentAnomoly.Evaluate();
     }
 
@@ -107,6 +109,7 @@ public class AnomolyManager : MonoBehaviour
 
     public int GenerateAnomoly(int prevv = -1)
     {
+        ForceRestore();
         
 
         int size = anomolies.Count;

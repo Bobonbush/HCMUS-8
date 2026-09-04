@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ff89d15d6a5b47449cd1d87d767e00d, type: 3}
+  m_Name: End
+  m_EditorClassIdentifier: Assembly-CSharp::CutSceneInfo
+  HideUI: 1
+  StillHideUI: 0
+  useDialog: 1
+  useBigDialog: 1
+  delayTime: 2
+  showTime: 3
+  fadingTime: 2
+  newScene: 1
+  returnToMainMenu: 0
+  SceneID: MainMenu
+  SpawnID: 
+  SpawnOffset: {x: 0, y: 0, z: 0}
+  RealTimeAnimation: 0
+  UsedCamera: 0
+  EnableObjects: []
+  ForceCameraMovement: []
+  PlayerForceDatas: []
+  ComeBackCamera: 1
+  timeCameraComeBack: 1

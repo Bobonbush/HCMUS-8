@@ -1,0 +1,9 @@
+Restroom exit=(16.36, 0.02, -33.82), width=1.096465, water base=0.06339967
+Door renderer bounds=Center: (58.14, 1.19, -134.01), Extents: (0.55, 1.17, 0.11)
+t=0s depth=0m, doorway reached=False, hallway travel=0
+t=20s depth=0.002804667m, doorway reached=False, hallway travel=0
+t=40s depth=0.007471334m, doorway reached=True, hallway travel=0.4671803
+t=65s depth=0.01330467m, doorway reached=True, hallway travel=3.96718
+t=100s depth=0.02147133m, doorway reached=True, hallway travel=7.90438
+t=600s depth=0.035m, doorway reached=True, hallway travel=7.90438
+PASS: shallow cap, hall timing, doorway routing, shader, restore
