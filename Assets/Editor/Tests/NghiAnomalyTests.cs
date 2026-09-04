@@ -8,6 +8,12 @@ public class NghiAnomalyTests
     private const string FloorPath = "Assets/Prefabs/Floor.prefab";
 
     [Test]
+    public void CameraAnomaly_TracksOnlyWhenActiveAndLeavesElevatorFixed()
+    {
+        NghiCameraTrackingSetup.CheckTracking();
+    }
+
+    [Test]
     public void SwitchingAwayFromFollow_RestoresPatrolAndClearsFollowState()
     {
         GameObject floor = PrefabUtility.LoadPrefabContents(FloorPath);
@@ -77,7 +83,8 @@ public class NghiAnomalyTests
             cameras.Evaluate();
             Assert.That(target.activeSelf, Is.True);
             cameras.Restore();
-            Assert.That(target.activeSelf, Is.False);
+            Assert.That(target.activeSelf, Is.True);
+            target.SetActive(false);
 
             Anomoly19 corpse = host.AddComponent<Anomoly19>();
             corpse.corpses.Add(target);

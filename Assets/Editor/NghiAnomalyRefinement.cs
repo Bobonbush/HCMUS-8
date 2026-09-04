@@ -88,11 +88,12 @@ public static class NghiAnomalyRefinement
         var normal = BoundsOf(a.normalTrash);
         root.transform.position = new Vector3(normal.center.x, normal.min.y + 0.55f, normal.center.z);
     }
-    static void Cameras(GameObject floor)
+    public static void Cameras(GameObject floor)
     {
         var a = floor.GetComponentInChildren<Anomoly34>(true); a.cameraHeads.Clear();
         foreach (var root in a.extraCameras)
         {
+            if (root == null) { a.cameraHeads.Add(null); continue; }
             var pivot = Child(root.transform, "TrackingHead");
             if (pivot.childCount == 0)
             {
@@ -114,6 +115,7 @@ public static class NghiAnomalyRefinement
                     filter.sharedMesh=CameraPart(source,true);
                 }
             }
+            Anomoly34.AnchorTrackingHead(pivot);
         }
     }
     static Mesh CameraPart(Mesh source,bool head)

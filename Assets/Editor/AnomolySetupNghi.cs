@@ -183,7 +183,7 @@ public static class AnomolySetupNghi
         }
 
         group.gameObject.SetActive(true);
-        foreach (GameObject cameraObject in anomoly.extraCameras) cameraObject.SetActive(false);
+        foreach (GameObject cameraObject in anomoly.extraCameras) cameraObject.SetActive(true);
         return anomoly;
     }
 
@@ -773,7 +773,7 @@ public static class AnomolySetupNghi
             cameras.Restore(); cameras.Evaluate();
             if (cameras.extraCameras.Any(x => x == null || !x.activeSelf)) failures.Add("Anomoly34 Evaluate did not reveal every camera");
             cameras.Restore();
-            if (cameras.extraCameras.Any(x => x != null && x.activeSelf)) failures.Add("Anomoly34 Restore left a camera visible");
+            if (cameras.extraCameras.Any(x => x != null && !x.activeSelf)) failures.Add("Anomoly34 Restore hid a permanent camera");
         }
         if (corpse != null)
         {

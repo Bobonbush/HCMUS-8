@@ -63,7 +63,7 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly30", "NPC moves in a different trajectory" },
         { "Anomoly33", "" },
         { "Anomoly09", "On a desk in the exam room: a pen hovers over the paper, writing by itself" },
-        { "Anomoly34", "CCTV follows at the edge of your vision; look directly at it to catch it looking away" },
+        { "Anomoly34", "School cameras slowly follow you; the elevator camera stays fixed" },
         { "Anomoly11", "The bin and bags are a flat photograph that turns to face you" },
         { "Anomoly15", "Pass close to the patrolling NPC: it follows at the same walking speed, even when watched" },
         { "Anomoly19", "A seated body waits beside the toilet" },
