@@ -13,13 +13,16 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    private int CurrentFloor = 8;
+    private int CurrentFloor = 11;
 
     private float offset = 5.664f;
 
     private int prevAnomoly = -1;
     
-    private int maxFloor = 12;
+    private int maxFloor = 15;
+
+
+    private int offsetFloor = 3;
 
     List<int> DecisionPoints = new List<int>(){ 1, 1 };
 
@@ -28,9 +31,9 @@ public class GameManager : MonoBehaviour
     public bool AlwaysAnomoly = false;
     private int anomoly_flag = 0;
 
-    private bool infinityMode = true;
+    private bool infinityMode = false;
 
-    private bool sleepQuery = false;
+    private bool sleepQuery = true;
 
 
     private void Awake()
@@ -114,6 +117,7 @@ public class GameManager : MonoBehaviour
         // Manual testing owns anomaly selection; a hidden random anomaly must not
         // run while the overlay says the floor is clean or another test is selected.
         var tester = FindFirstObjectByType<AnomolyTester>();
+        
         if (tester != null && tester.IsActive)
         {
             ForceRestoreAll();
@@ -122,6 +126,8 @@ public class GameManager : MonoBehaviour
             EvaluateNPC();
             return;
         }
+
+       
         // Generate Anomoly here
 
         
@@ -171,7 +177,7 @@ public class GameManager : MonoBehaviour
 
     public void QueryEnter(int anomoly)
     {
-        if (CurrentFloor == 0) return;
+        if (CurrentFloor - offsetFloor == 0) return;
         if(sleepQuery)
         {
             sleepQuery = false;
@@ -183,18 +189,18 @@ public class GameManager : MonoBehaviour
         if (anomoly_flag == anomoly)
         {
             Debug.Log("Correct Anomoly");
+            
             if (!infinityMode)
             {
-                
+                sleepQuery = true;
                 CurrentFloor--;
-                // Loading End must finish this query before NewMap indexes floor -1.
                 if (CheckEndGame()) return;
             }
-            
         }else
         {
             Debug.Log("Wrong Anomoly");
-            CurrentFloor = 8;
+            if (CurrentFloor != 11) sleepQuery = true;
+            CurrentFloor = 11;
         }
 
 
@@ -334,7 +340,7 @@ public class GameManager : MonoBehaviour
 
     public int GetCurrentFloor()
     {
-        return CurrentFloor;
+        return CurrentFloor - offsetFloor;
     }
 
     public AnomolyManager GetCurrentAnomolyManager()

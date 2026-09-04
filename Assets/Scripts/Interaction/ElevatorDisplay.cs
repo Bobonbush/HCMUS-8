@@ -34,6 +34,7 @@ public class ElevatorDisplay : MonoBehaviour
 
         if (GameManager.Instance != null)
         {
+
             text.text = "" + (GameManager.Instance.GetCurrentFloor() + setAnomoly);
         }else
         {
