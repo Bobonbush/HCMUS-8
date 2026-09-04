@@ -25,8 +25,11 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _FloodRadius: 1000
-    - _WaveHeight: 0.09
+    - _FloodDepth: 0
+    - _FloodRadius: 0
+    - _FlowSpeed: 0.22
+    - _FoamStrength: 0.025
+    - _WaveHeight: 0.0015
     m_Colors:
     - _BaseColor: {r: 0.035, g: 0.11, b: 0.12, a: 0.9}
     - _FloodSource: {r: 0, g: 0, b: 0, a: 0}

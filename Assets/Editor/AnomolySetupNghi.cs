@@ -284,8 +284,8 @@ public static class AnomolySetupNghi
         }
         water.gameObject.SetActive(false);
         anomoly.waterSurfaces = new List<Transform> { water };
-        anomoly.riseDuration = 12f;
-        anomoly.riseHeight = 0.30f;
+        anomoly.riseDuration = 240f;
+        anomoly.riseHeight = 0.035f;
         return anomoly;
     }
 

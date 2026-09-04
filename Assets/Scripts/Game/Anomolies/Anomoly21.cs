@@ -2,97 +2,77 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
+// A delayed, shallow leak. This anomaly never submerges or damages the player.
 public class Anomoly21 : MonoBehaviour, Anomoly
 {
     public List<Transform> waterSurfaces = new List<Transform>();
-    public float riseHeight = 2.8f;
-    public float riseDuration = 8f;
+    [Range(0, 0.04f)] public float riseHeight = 0.035f;
+    [Min(1)] public float riseDuration = 240f;
+    [Min(0)] public float onsetDelay = 18f;
+    [Min(0)] public float spreadSpeed = 0.028f;
+    [Min(0.1f)] public float maxSpreadRadius = 4.5f;
+    [Range(0, 0.002f)] public float rippleHeight = 0.0015f;
     public List<ParticleSystem> toiletJets = new List<ParticleSystem>();
     public AudioSource waterRoar;
-    public Material underwaterMaterial;
     readonly List<Vector3> startPositions = new List<Vector3>();
+    MaterialPropertyBlock waterProperties;
     bool active;
     float elapsed;
-    GameObject overlay;
     Camera view;
     UniversalAdditionalCameraData cameraData;
     CameraOverrideOption originalOpaque;
-    AudioLowPassFilter muffler;
-    bool ownedMuffler;
-    bool originalFilterEnabled;
-    float originalCutoff;
-    readonly MaterialPropertyBlock waterProperties = new MaterialPropertyBlock();
+
     public void Evaluate()
     {
         if (active) return;
         CaptureStartPositions(); elapsed = 0; active = true;
         for (int i = 0; i < waterSurfaces.Count; i++) if (waterSurfaces[i] != null)
-        { waterSurfaces[i].localPosition = startPositions[i]; waterSurfaces[i].gameObject.SetActive(true); }
-        if (!Application.isPlaying) return;
-        foreach (var jet in toiletJets) if (jet != null) { jet.gameObject.SetActive(true); jet.Play(); }
-        if (waterRoar != null) waterRoar.Play();
-        AttachView(Camera.main);
+        { waterSurfaces[i].localPosition = startPositions[i]; waterSurfaces[i].gameObject.SetActive(false); }
     }
     void AttachView(Camera camera)
     {
         DetachView(); view = camera;
-        if (view == null || underwaterMaterial == null) return;
+        if (view == null) return;
         cameraData = view.GetUniversalAdditionalCameraData();
         originalOpaque = cameraData.requiresColorOption;
         cameraData.requiresColorOption = CameraOverrideOption.On;
-        overlay = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        overlay.name = "Flood_UnderwaterRefraction";
-        Destroy(overlay.GetComponent<Collider>());
-        overlay.transform.SetParent(view.transform, false);
-        overlay.GetComponent<Renderer>().sharedMaterial = underwaterMaterial;
-        overlay.SetActive(false);
-        var listener = view.GetComponent<AudioListener>();
-        if (listener != null)
-        {
-            muffler = listener.GetComponent<AudioLowPassFilter>();
-            ownedMuffler = muffler == null;
-            if (ownedMuffler) muffler = listener.gameObject.AddComponent<AudioLowPassFilter>();
-            originalFilterEnabled = muffler.enabled; originalCutoff = muffler.cutoffFrequency;
-            if (ownedMuffler) muffler.enabled = false;
-        }
     }
     void LateUpdate()
     {
         if (!active) return;
         elapsed += Time.deltaTime;
-        float rise = riseHeight * Mathf.Clamp01(elapsed / Mathf.Max(0.01f, riseDuration));
-        bool submerged = false;
-        if (Application.isPlaying && Camera.main != view) AttachView(Camera.main);
+        float leakTime = Mathf.Max(0, elapsed - onsetDelay);
+        bool leaking = elapsed > onsetDelay;
+        float radius = Mathf.Min(maxSpreadRadius, 0.08f + leakTime * spreadSpeed);
+        // Hard cap also protects older scene overrides from the previous full-height flood.
+        float rise = Mathf.Clamp(riseHeight, 0, 0.04f) * Mathf.Clamp01(leakTime / Mathf.Max(1, riseDuration));
+        if (leaking && Application.isPlaying)
+        {
+            if (Camera.main != view) AttachView(Camera.main);
+            if (toiletJets.Count > 0 && toiletJets[0] != null && !toiletJets[0].gameObject.activeSelf)
+            { toiletJets[0].gameObject.SetActive(true); toiletJets[0].Play(); }
+            if (waterRoar != null && !waterRoar.isPlaying) waterRoar.Play();
+        }
         for (int i = 0; i < waterSurfaces.Count; i++)
         {
             var surface = waterSurfaces[i]; if (surface == null) continue;
-            surface.localPosition = startPositions[i] + Vector3.up * rise;
+            surface.position = surface.parent.TransformPoint(startPositions[i]) + Vector3.up * rise;
             var renderer = surface.GetComponent<Renderer>();
             if (renderer != null)
             {
+                if (waterProperties == null) waterProperties = new MaterialPropertyBlock();
                 renderer.GetPropertyBlock(waterProperties);
                 var source = toiletJets.Count > 0 && toiletJets[0] != null ? toiletJets[0].transform.position : surface.position;
                 waterProperties.SetVector("_FloodSource", source);
-                waterProperties.SetFloat("_FloodRadius", 0.5f + elapsed * 12f);
+                waterProperties.SetFloat("_FloodRadius", leaking ? radius : 0);
+                waterProperties.SetFloat("_FloodDepth", rise);
+                waterProperties.SetFloat("_WaveHeight", Mathf.Clamp(rippleHeight, 0, 0.002f));
+                waterProperties.SetFloat("_FlowSpeed", 0.22f);
+                waterProperties.SetFloat("_FoamStrength", 0.025f);
                 renderer.SetPropertyBlock(waterProperties);
             }
-            if (view == null) continue;
-            var local = surface.InverseTransformPoint(view.transform.position);
-            // Only immerse the player inside this floor's actual flooded footprint.
-            submerged |= Mathf.Abs(local.x) <= 0.5f && Mathf.Abs(local.z) <= 0.5f
-                && view.transform.position.y < surface.position.y - 0.035f
-                && view.transform.position.y > surface.parent.TransformPoint(startPositions[i]).y - 0.2f;
+            surface.gameObject.SetActive(leaking);
         }
-        if (overlay != null)
-        {
-            overlay.SetActive(submerged);
-            float distance = view.nearClipPlane + 0.025f;
-            overlay.transform.localPosition = Vector3.forward * distance;
-            float height = 2 * distance * Mathf.Tan(view.fieldOfView * Mathf.Deg2Rad * 0.5f) * 1.2f;
-            overlay.transform.localScale = new Vector3(height * view.aspect, height, 1);
-        }
-        if (muffler != null)
-        { muffler.enabled = submerged || (!ownedMuffler && originalFilterEnabled); muffler.cutoffFrequency = submerged ? 650 : originalCutoff; }
     }
     public void Restore()
     {
@@ -106,14 +86,8 @@ public class Anomoly21 : MonoBehaviour, Anomoly
     }
     void DetachView()
     {
-        if (overlay != null) { overlay.SetActive(false); Destroy(overlay); }
         if (cameraData != null) cameraData.requiresColorOption = originalOpaque;
-        if (muffler != null)
-        {
-            if (ownedMuffler) Destroy(muffler);
-            else { muffler.enabled = originalFilterEnabled; muffler.cutoffFrequency = originalCutoff; }
-        }
-        overlay = null; view = null; cameraData = null; muffler = null;
+        view = null; cameraData = null;
     }
     void OnDisable() { Restore(); }
     void CaptureStartPositions()

@@ -47,9 +47,8 @@ public static class NghiRefinementValidation
             });
             check("Flood shader and references",()=>{
                 var a=floor.GetComponentInChildren<Anomoly21>(true);
-                Require(a.riseHeight>2&&a.riseDuration<=8,"Flood defaults");
+                Require(a.riseHeight<=0.04f && a.riseDuration>=240 && a.onsetDelay>=15 && a.spreadSpeed<=0.03f,"Subtle leak defaults");
                 Require(a.toiletJets.Count>0&&a.waterRoar.clip!=null,"Missing effects");
-                Require(!ShaderUtil.ShaderHasError(a.underwaterMaterial.shader),"Underwater shader error");
                 Require(!ShaderUtil.ShaderHasError(a.waterSurfaces[0].GetComponent<Renderer>().sharedMaterial.shader),"Water shader error");
             });
             check("Closed classroom containment and restoration",()=>{
@@ -95,4 +94,3 @@ public static class NghiRefinementValidation
     }
     static void SceneMove(GameObject go,UnityEngine.SceneManagement.Scene scene){UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go,scene);}
 }
-

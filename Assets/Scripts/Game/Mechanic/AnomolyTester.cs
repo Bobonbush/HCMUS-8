@@ -66,9 +66,9 @@ public class AnomolyTester : MonoBehaviour
         { "Anomoly11", "The bin and bags are a flat photograph that turns to face you" },
         { "Anomoly15", "Pass close to the patrolling NPC: it follows at the same walking speed, even when watched" },
         { "Anomoly19", "A seated body waits beside the toilet" },
-        { "Anomoly21", "Water bursts from the toilets and rises above your head in eight seconds" },
+        { "Anomoly21", "After 18 seconds, a shallow puddle slowly seeps from one toilet; check again after a minute" },
         { "Anomoly28", "A crowd of mismatched faces waits behind the window near the toilets" },
-        { "Anomoly17", "The same NPC now appears as a woman in a green dress" },
+        { "Anomoly17", "The same NPC appears as a woman in a gray vest and jeans, with a speed-matched walking gait" },
         { "Anomoly35", "Look into the closed classroom: faces watch you, and more fall from its ceiling" },
     };
 

@@ -41,3 +41,15 @@ The PCCC poster source remains documented separately in `PCCC_Texture_Source.md`
 - `WaitingStudent_*.asset`: seated pose baked from the existing Quaternius CC0 Animated Woman rig; muted shirt and dark trousers. This remains a low-poly model, not a newly acquired photorealistic student scan.
 - `FloodRoar.wav`: original procedural noise/surge audio generated locally for this project; no third-party recording.
 - Flood, underwater and billboard shaders are project-authored. Face expression variation deforms individual copies of the existing attributed HeadRef mesh without modifying its source.
+
+## Anomaly 17 replacement (2026-09-04)
+
+- `Rocketbox/Female_Adult_13.fbx` and `f019_*` textures: Microsoft Rocketbox Avatar Library, Female Adult 13, MIT license. A gray vest, black shirt, jeans and boots replace the earlier green-dress visual.
+- `Rocketbox/f_walk_neutral.max.fbx` and `f_idle_breathe_01.max.fbx`: matching Rocketbox biped motions, MIT. `Walk.anim` and `Idle.anim` adapt matching bone rotations and vertical body motion to this avatar; horizontal travel remains controlled by the existing NPC NavMeshAgent. Animation cadence follows measured travel speed.
+- Source: https://github.com/microsoft/Microsoft-Rocketbox
+- License: `Rocketbox/LICENSE.md`. Retrieved 2026-09-04. The original model and texture assets are retained alongside the derived animation clips.
+- The Quaternius model remains in the project for the corpse assets; it is no longer the #17 appearance.
+
+## Slow leak revision (2026-09-04)
+
+Anomaly 21 now begins after 18 seconds. One bowl leaks into a local puddle, spreading at 0.028 m/s up to a 4.5 m radius. Depth approaches 0.035 m over 240 seconds and is hard-capped at 0.04 m in runtime code. Ripples are millimetres high, particles are small and sparse, and audio is quiet and audible only nearby. Underwater distortion, muffling and submersion logic were removed. Existing `Underwater` assets are unused by this anomaly.

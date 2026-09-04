@@ -153,9 +153,9 @@ public static class NghiAnomalyRefinement
         mesh.RecalculateNormals(); mesh.bounds=new Bounds(Vector3.zero,new Vector3(1,20,1));
         AssetDatabase.CreateAsset(mesh,path); return mesh;
     }
-    static void Flood(GameObject floor)
+    public static void Flood(GameObject floor)
     {
-        var a=floor.GetComponentInChildren<Anomoly21>(true); a.riseHeight=2.8f; a.riseDuration=8f;
+        var a=floor.GetComponentInChildren<Anomoly21>(true); a.riseHeight=0.035f; a.riseDuration=240f; a.onsetDelay=18f; a.spreadSpeed=0.028f; a.maxSpreadRadius=4.5f; a.rippleHeight=0.0015f;
         var mat=Mat("M_Nghi_FloodWaves","Nghi/Flood",new Color(0.035f,0.11f,0.12f,0.9f));
         foreach (var water in a.waterSurfaces)
         {
@@ -163,7 +163,7 @@ public static class NghiAnomalyRefinement
             foreach(var c in water.GetComponents<Collider>()) Object.DestroyImmediate(c);
             water.gameObject.SetActive(false);
         }
-        a.underwaterMaterial=Mat("M_Nghi_Underwater","Nghi/Underwater",Color.white);
+        mat.SetFloat("_WaveHeight",a.rippleHeight); mat.SetFloat("_FloodRadius",0); mat.SetFloat("_FlowSpeed",0.22f); mat.SetFloat("_FoamStrength",0.025f);
         var effects=Child(a.transform,"ToiletOutflow");
         var splash=Mat("M_Nghi_Foam","Nghi/Splash",new Color(0.6f,0.77f,0.76f,0.55f));
         if (effects.childCount==0)
@@ -184,6 +184,20 @@ public static class NghiAnomalyRefinement
                 a.toiletJets.Add(ps); jet.gameObject.SetActive(false);
             }
         }
+        foreach(var ps in a.toiletJets)
+        {
+            var main=ps.main; main.startSpeed=new ParticleSystem.MinMaxCurve(0.06f,0.15f); main.startSize=new ParticleSystem.MinMaxCurve(0.004f,0.012f); main.startLifetime=0.45f;
+            var emission=ps.emission; emission.rateOverTime=8; var shape=ps.shape; shape.radius=0.025f; shape.angle=6;
+        }
+        // The original corridor mesh ended short of the bowl. Give the leak its own
+        // small footprint centred on the source so the first drops are visible there.
+        if(a.toiletJets.Count>0)
+        foreach(var water in a.waterSurfaces)
+        {
+            var source=a.toiletJets[0].transform.position;
+            water.position=new Vector3(source.x,water.position.y,source.z);
+            water.localScale=new Vector3(9.2f,0.025f,9.2f);
+        }
         if(a.waterRoar==null)
         {
             var sound=Child(a.transform,"RoaringDrain");
@@ -191,7 +205,7 @@ public static class NghiAnomalyRefinement
             a.waterRoar=sound.gameObject.AddComponent<AudioSource>();
         }
         a.waterRoar.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(Art+"FloodRoar.wav");
-        a.waterRoar.loop=true; a.waterRoar.playOnAwake=false; a.waterRoar.spatialBlend=0.65f; a.waterRoar.volume=0.7f; a.waterRoar.minDistance=4; a.waterRoar.maxDistance=35;
+        a.waterRoar.loop=true; a.waterRoar.playOnAwake=false; a.waterRoar.spatialBlend=1f; a.waterRoar.volume=0.08f; a.waterRoar.minDistance=0.5f; a.waterRoar.maxDistance=5;
     }
     static void Faces(GameObject floor)
     {
@@ -318,5 +332,3 @@ public static class NghiAnomalyRefinement
     static void Aim(Transform joint,Transform next,Vector3 direction)
     { joint.rotation=Quaternion.FromToRotation(next.position-joint.position,direction.normalized)*joint.rotation; }
 }
-
-
