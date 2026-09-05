@@ -24,7 +24,7 @@ public class Anomoly02 : MonoBehaviour, Anomoly
     public void Evaluate()
     {
         coolDown = 0.0f;
-        coolDownBeforeStart = Random.Range(5.0f, 10.0f);
+        coolDownBeforeStart = Random.Range(10.0f, 15.0f);
 
     }
 
