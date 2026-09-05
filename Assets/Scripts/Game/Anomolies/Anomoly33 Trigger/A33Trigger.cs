@@ -27,7 +27,7 @@ public class A33Trigger : MonoBehaviour
     [SerializeField]
     DoorSmoothRotate openDoor;
 
-    float time = 10.0f;
+    float time = -10.0f;
 
     Color LightColor = Color.black;
 
@@ -41,7 +41,7 @@ public class A33Trigger : MonoBehaviour
         closeDoor.Play();
         // The door banged shut hard enough to rattle the floor - kick the camera.
         FirstPersonCameraFeel feel = FindFirstObjectByType<FirstPersonCameraFeel>();
-        if (feel != null) feel.SlamShake(1f);
+        if (feel != null) feel.SlamShake(2f);
         AdditionalText.SetActive(true);
         
         TurnoffLight();

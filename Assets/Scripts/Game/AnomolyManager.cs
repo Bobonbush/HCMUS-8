@@ -141,7 +141,6 @@ public class AnomolyManager : MonoBehaviour
         int randomMized = Random.Range(0, size);
         int randomMize = usingAnomolies[randomMized];
 
-        Debug.Log("Anomoly #" + randomMize);
 
 
         

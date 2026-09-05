@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
 
     private int sleepQuery = 1;
 
+    float minQueryListenerTiming = 0.0f;
 
     private void Awake()
     {
@@ -173,23 +174,27 @@ public class GameManager : MonoBehaviour
         }
 
         EvaluateNPC();
+
+        Debug.Log("New Mapped");
     }
 
     public void QueryEnter(int anomoly)
     {
         if (CurrentFloor - offsetFloor == 0) return;
-        if(sleepQuery  > 0)
+        if (sleepQuery > 0)
         {
             sleepQuery--;
             return;
         }
-        sleepQuery++;
+        if (minQueryListenerTiming > 0.0f) return;
+        
+        minQueryListenerTiming = 3.0f;
         RestoreAnomoly();
         RestoreNPC();
         
         if (anomoly_flag == anomoly)
         {
-            Debug.Log("Correct Anomoly");
+            //Debug.Log("Correct Anomoly");
             
             if (!infinityMode)
             {
@@ -202,8 +207,7 @@ public class GameManager : MonoBehaviour
             }
         }else
         {
-            Debug.Log("Wrong Anomoly");
-            if (CurrentFloor == 11) sleepQuery--;
+            //Debug.Log("Wrong Anomoly");
             CurrentFloor = 11;
         }
 
@@ -228,6 +232,8 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         MaintainInfinity();
+
+        minQueryListenerTiming -= Time.deltaTime;
     }
 
     // For anomolies that need to know where the player is (looker, doppelganger, lift swap...)

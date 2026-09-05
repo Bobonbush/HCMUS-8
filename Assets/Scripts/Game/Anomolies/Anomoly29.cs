@@ -58,20 +58,19 @@ public class Anomoly29 : MonoBehaviour, Anomoly
         if (boxA == null || boxB == null) return;
 
         // Grow the bounds a little so "outside" really means clear of the trigger.
-        Bounds a = boxA.bounds; a.Expand(0.3f);
-        Bounds b = boxB.bounds; b.Expand(0.3f);
+        Bounds a = boxA.bounds;
+        Bounds b = boxB.bounds; 
         Vector3 probe = player.position + Vector3.up * 0.6f;
         bool insideA = a.Contains(probe);
-        bool insideAny = insideA || b.Contains(probe);
+        bool insideB = b.Contains(probe);
+        bool insideAny = insideA || insideB;
 
         // Re-arm the triggers once the player has walked clear of both cabins.
         if (collidersDisabled && !insideAny) SetTriggersEnabled(true);
 
         if (!active || mirrored) return;
 
-        // Only mirror a player on this floor.
-        float floorY = transform.parent != null ? transform.parent.position.y : transform.position.y;
-        if (Mathf.Abs(player.position.y - floorY) > 2.5f) return;
+
 
         if (insideAny)
         {
@@ -80,7 +79,29 @@ public class Anomoly29 : MonoBehaviour, Anomoly
 
             float midX = (liftTriggerA.position.x + liftTriggerB.position.x) * 0.5f;
             Vector3 pos = player.position;
-            pos.x = 2f * midX - pos.x;
+            float offset = 1.2f;
+            
+            if(liftTriggerA.position.x > player.position.x)
+            {
+                pos.x = 2f * midX - pos.x - offset;
+            }else if(liftTriggerB.position.x < player.position.x)
+            {
+                pos.x = 2f * midX - pos.x + offset;
+            }else if(insideB)
+            {
+                pos.x = 2f * midX - pos.x - offset;
+            }else
+            {
+                pos.x = 2f * midX - pos.x - offset;
+            }
+            
+            
+
+
+            
+            
+
+            Debug.Log(pos.x + "Between" + liftTriggerA.position.x + " And " + liftTriggerB.position.x);
             float yaw = -player.eulerAngles.y;
 
             FirstPersonController fpc = player.GetComponent<FirstPersonController>();
@@ -102,8 +123,8 @@ public class Anomoly29 : MonoBehaviour, Anomoly
             ElevatorSounds boarded = NearestCabin(insideA ? liftTriggerA.position : liftTriggerB.position);
             ElevatorSounds destination = NearestCabin(insideA ? liftTriggerB.position : liftTriggerA.position);
 
-            GameManager.Instance.AddUpQueryQueue();
-            if (destination != null) destination.AdoptRideFrom(boarded);
+            //GameManager.Instance.AddUpQueryQueue();
+            //if (destination != null) destination.AdoptRideFrom(boarded);
         }
     }
 
