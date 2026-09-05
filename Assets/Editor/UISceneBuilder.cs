@@ -257,16 +257,14 @@ namespace Game.UI.EditorTools
             veil.GetComponent<Image>().color = UITheme.PauseVeil;
             veil.GetComponent<Image>().raycastTarget = false;
 
-            GameObject buttons = CreateTransparent(screenObject.transform, "MenuButtons", new Vector2(UITheme.TableWidth, 200f));
-            Anchor(
-                (RectTransform)buttons.transform,
-                new Vector2(0.5f, 0.5f),
-                new Vector2(UITheme.TableWidth, 200f));
-            VerticalLayout(buttons, UITheme.RowGap, 0);
+            // The menu sits in a dark column down the left edge, the way most first-person games
+            // pause: the frozen frame stays in view on the right, so the screen still reads as "the
+            // game, paused" rather than as a separate menu. Title, hairline, then the three rows.
+            GameObject panel = CreatePausePanel(screenObject.transform, out GameObject buttons);
 
-            MenuButtonRow resume = CreateMenuRow(buttons.transform, "ResumeRow", "menu.resume");
-            MenuButtonRow optionsRow = CreateMenuRow(buttons.transform, "OptionsRow", "menu.options");
-            MenuButtonRow quitRow = CreateMenuRow(buttons.transform, "QuitRow", "menu.quit_main");
+            MenuButtonRow resume = CreateMenuRow(buttons.transform, "ResumeRow", "menu.resume", true);
+            MenuButtonRow optionsRow = CreateMenuRow(buttons.transform, "OptionsRow", "menu.options", true);
+            MenuButtonRow quitRow = CreateMenuRow(buttons.transform, "QuitRow", "menu.quit_main", true);
 
             RowMenu rowMenu = buttons.AddComponent<RowMenu>();
             SetRef(rowMenu, "inputActions", LoadInputActions());
@@ -275,7 +273,10 @@ namespace Game.UI.EditorTools
 
             PauseMenu pause = screenObject.AddComponent<PauseMenu>();
             SetRef(pause, "optionsScreen", options);
-            SetRef(pause, "menuButtons", buttons);
+            // The whole column, not just the rows: PauseMenu hides this while Options is open, and
+            // the Options title would otherwise draw on top of the panel. RowMenu.CollectFrom looks
+            // through children, so it still finds the three rows inside.
+            SetRef(pause, "menuButtons", panel);
             SetRef(pause, "rowMenu", rowMenu);
             SetRef(pause, "pauseBlur", pauseBlur);
             SetRef(pause, "inputActions", LoadInputActions());
@@ -288,6 +289,65 @@ namespace Game.UI.EditorTools
 
             PrefabUtility.SaveAsPrefabAsset(canvasObject, PausePrefabPath);
             Object.DestroyImmediate(canvasObject);
+        }
+
+        /// <summary>
+        /// The pause column: a near-opaque panel anchored to the left edge, full height, with a
+        /// hairline along its right side. Inside, a vertically centred stack: title, hairline,
+        /// breathing room, then <paramref name="buttons"/>, which the caller fills with rows.
+        /// </summary>
+        private static GameObject CreatePausePanel(Transform parent, out GameObject buttons)
+        {
+            GameObject panel = CreatePanel(parent, "MenuPanel", Vector2.zero);
+            RectTransform panelRect = (RectTransform)panel.transform;
+            panelRect.anchorMin = new Vector2(0f, 0f);
+            panelRect.anchorMax = new Vector2(0f, 1f);
+            panelRect.pivot = new Vector2(0f, 0.5f);
+            panelRect.anchoredPosition = Vector2.zero;
+            panelRect.sizeDelta = new Vector2(UITheme.PausePanelWidth, 0f);
+            panel.GetComponent<Image>().color = UITheme.PausePanel;
+
+            GameObject edge = CreatePanel(panel.transform, "Edge", Vector2.zero);
+            RectTransform edgeRect = (RectTransform)edge.transform;
+            edgeRect.anchorMin = new Vector2(1f, 0f);
+            edgeRect.anchorMax = new Vector2(1f, 1f);
+            edgeRect.pivot = new Vector2(1f, 0.5f);
+            edgeRect.anchoredPosition = Vector2.zero;
+            edgeRect.sizeDelta = new Vector2(2f, 0f);
+            edge.GetComponent<Image>().color = UITheme.Hairline;
+            edge.GetComponent<Image>().raycastTarget = false;
+
+            GameObject content = CreateTransparent(panel.transform, "Content", Vector2.zero);
+            Stretch((RectTransform)content.transform);
+            VerticalLayout(content, UITheme.SpaceSmall, 0);
+            VerticalLayoutGroup stack = content.GetComponent<VerticalLayoutGroup>();
+            int inset = (int)UITheme.PausePanelPadding;
+            stack.padding = new RectOffset(inset, inset, 0, 0);
+            stack.childAlignment = TextAnchor.MiddleLeft;
+
+            TextMeshProUGUI title = CreateLabel(
+                content.transform, "Title", "Paused", UITheme.Display, TextAlignmentOptions.BottomLeft, true);
+            title.color = UITheme.InkOnDark;
+            title.fontStyle = FontStyles.UpperCase;
+            title.characterSpacing = 4f;
+            LayoutElement titleLayout = title.gameObject.AddComponent<LayoutElement>();
+            titleLayout.preferredHeight = UITheme.Display + UITheme.SpaceLarge;
+            SetString(title.gameObject.AddComponent<LocalizedLabel>(), "key", "menu.paused");
+
+            GameObject hairline = CreatePanel(content.transform, "Hairline", Vector2.zero);
+            hairline.GetComponent<Image>().color = UITheme.Hairline;
+            hairline.GetComponent<Image>().raycastTarget = false;
+            LayoutElement hairlineLayout = hairline.AddComponent<LayoutElement>();
+            hairlineLayout.preferredHeight = 2f;
+            hairlineLayout.minHeight = 2f;
+
+            GameObject spacer = CreateTransparent(content.transform, "Spacer", Vector2.zero);
+            spacer.AddComponent<LayoutElement>().preferredHeight = UITheme.SpaceLarge;
+
+            buttons = CreateTransparent(content.transform, "MenuButtons", Vector2.zero);
+            VerticalLayout(buttons, UITheme.RowGap, 0);
+
+            return panel;
         }
 
         // ---- the shared options screen -----------------------------------------------------------
@@ -687,11 +747,24 @@ namespace Game.UI.EditorTools
             SetString(label.gameObject.AddComponent<LocalizedLabel>(), "key", key);
         }
 
-        private static MenuButtonRow CreateMenuRow(Transform parent, string name, string labelKey)
+        /// <summary>
+        /// Menu entries centre their text by default (main menu). The pause column is left-aligned
+        /// under its title, so its rows pass <paramref name="leftAligned"/> and pick up the same
+        /// left inset as the settings tables.
+        /// </summary>
+        private static MenuButtonRow CreateMenuRow(Transform parent, string name, string labelKey, bool leftAligned = false)
         {
             GameObject row = CreateRowShell(parent, name, out TextMeshProUGUI caption);
-            caption.alignment = TextAlignmentOptions.Center;
             Stretch(caption.rectTransform);
+            if (leftAligned)
+            {
+                caption.alignment = TextAlignmentOptions.MidlineLeft;
+                caption.rectTransform.offsetMin = new Vector2(UITheme.RowPaddingLeft, 0f);
+            }
+            else
+            {
+                caption.alignment = TextAlignmentOptions.Center;
+            }
 
             MenuButtonRow component = row.AddComponent<MenuButtonRow>();
             SetRowRefs(row, component);

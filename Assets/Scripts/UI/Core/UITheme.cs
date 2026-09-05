@@ -46,6 +46,10 @@ namespace Game.UI
 
         /// <summary>Veil over the live game behind the pause menu.</summary>
         public static readonly Color PauseVeil = Hex(0x101114, 0.55f);
+        /// <summary>The column down the left edge that holds the pause menu. Nearly opaque so the light rows sit on something steady.</summary>
+        public static readonly Color PausePanel = Hex(0x0B0C10, 0.90f);
+        /// <summary>Thin light line on dark surfaces: under the pause title, along the panel edge.</summary>
+        public static readonly Color Hairline = Hex(0xFFFFFF, 0.14f);
         /// <summary>Veil over the blurred photo in the menu scenes.</summary>
         public static readonly Color PhotoScrim = Hex(0xE0E0E4, 0.30f);
 
@@ -71,6 +75,9 @@ namespace Game.UI
         // ---- table metrics -----------------------------------------------------------------------
 
         public const float TableWidth = 900f;
+        /// <summary>Width of the pause menu column, and the inset of its contents from the edge.</summary>
+        public const float PausePanelWidth = 640f;
+        public const float PausePanelPadding = 96f;
         public const float RowHeight = 52f;
         /// <summary>Hairline between rows, so the strips read as a table rather than one slab.</summary>
         public const float RowGap = 2f;
