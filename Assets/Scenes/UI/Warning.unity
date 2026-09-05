@@ -163,9 +163,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bdbdd6bf8ac26d43ba959ec0134cbc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CutTrigger
-  info: {fileID: 11400000, guid: f3cf10283c1446d4181547e19b1353cf, type: 2}
+  info: {fileID: 11400000, guid: e3333b00f693e294bada8f8aa6948bbf, type: 2}
   type: 0
-  startNode: {fileID: 11400000, guid: ea137e2a4bd3d2749b1b0f074a157cae, type: 2}
+  startNode: {fileID: 11400000, guid: 6b1f3ef150ab66a4bb733ecead465cee, type: 2}
   style: 0
   bubbleTarget: {fileID: 0}
 --- !u!1 &115174072
@@ -929,7 +929,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Warning
+  m_text: HEALTH & SAFETY WARNING
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
   m_sharedMaterial: {fileID: 726396283194482549, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
@@ -995,7 +995,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -274.9923, w: 0}
+  m_margin: {x: 0, y: 0, z: -513.0799, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1312,7 +1312,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 19, y: 0}
+  m_AnchoredPosition: {x: 14, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2069690214
@@ -1335,26 +1335,23 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'This game is a work of fiction.
+  m_text: 'This game contains flashing lights, rapidly changing images, intense visual
+    effects, and other lighting effects that may cause discomfort or trigger seizures
+    in some individuals.
 
 
-    The characters, locations, organizations,
-    and events depicted in this game are entirely fictional. Any resemblance to actual
-    persons, living or deceased, or real events is purely coincidental.
+    If you have a history of epilepsy, seizures, heart
+    conditions, or are sensitive to flashing or strobing lights, please consult a
+    doctor before playing.
 
 
-    This
-    game is not based on any real story or actual events, and it is not intended
-    to portray, accuse, defame, or disparage any real person, organization, or community.
+    Stop playing immediately and seek medical attention
+    if you experience dizziness, nausea, headaches, blurred vision, muscle twitching,
+    loss of awareness, or any other unusual symptoms.
 
 
-    Some
-    scenes and themes may contain disturbing imagery, violence, psychological horror,
-    and other mature content. Player discretion is advised.
-
-
-    This game is intended
-    for entertainment purposes only.'
+    Player discretion is
+    advised.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
   m_sharedMaterial: {fileID: 726396283194482549, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
@@ -1420,7 +1417,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 59.035645, y: 0, z: 101.233826, w: 0}
+  m_margin: {x: 87.03821, y: 0, z: 126.53961, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

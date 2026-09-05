@@ -19,10 +19,13 @@ public class GameManager : MonoBehaviour
 
     private int prevAnomoly = -1;
     
-    private int maxFloor = 15;
+    private int maxFloor = 14;
 
 
     private int offsetFloor = 3;
+
+    [Tooltip("Floors further than this many floors from the current one are deactivated (not rendered, not simulated).")]
+    [SerializeField] private int renderRadius = 4;
 
     List<int> DecisionPoints = new List<int>(){ 1, 1 };
 
@@ -33,8 +36,9 @@ public class GameManager : MonoBehaviour
 
     private bool infinityMode = false;
 
-    private bool sleepQuery = true;
+    private int sleepQuery = 1;
 
+    float minQueryListenerTiming = 0.0f;
 
     private void Awake()
     {
@@ -50,6 +54,8 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         LoadFloor();
+        RestoreAnomoly();
+        RestoreNPC();
         NewMap();
     }
 
@@ -62,6 +68,8 @@ public class GameManager : MonoBehaviour
             floor.transform.position = new Vector3(42.33f, (i - CurrentFloor) * offset, -99.65f);
             createdFloor.Add(floor);
         }
+
+        MaintainRender();
     }
 
     // should be one or minus one only
@@ -73,6 +81,22 @@ public class GameManager : MonoBehaviour
             position.y += offset * unit;
             createdFloor[i].transform.position = position;
         }  
+    }
+
+    // Only floors within renderRadius of CurrentFloor stay active. The player never leaves
+    // createdFloor[CurrentFloor - 1] (MaintainInfinity shifts the stack around them), so floors
+    // further away than that are never visible and do not need their lights, NPCs and
+    // anomaly scripts running. Cheap to call every frame: SetActive only runs on a change.
+    private void MaintainRender()
+    {
+        for (int i = 0; i < createdFloor.Count; i++)
+        {
+            bool shouldRender = Mathf.Abs((i + 1) - CurrentFloor) <= renderRadius;
+            if (createdFloor[i].activeSelf != shouldRender)
+            {
+                createdFloor[i].SetActive(shouldRender);
+            }
+        }
     }
 
     private void MaintainInfinity()
@@ -94,6 +118,7 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateAnomoly()
     {
+        Debug.Log("Called");
         prevAnomoly =  createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().GenerateAnomoly(prevAnomoly);
     }
 
@@ -140,14 +165,22 @@ public class GameManager : MonoBehaviour
         int dice = 0;
         int chosenPoint = Random.Range(0, total);
         int chosenIndex = 0;
-        for(int i = 0; i < DecisionPoints.Count; i++)
+
+        for (int i = 0; i < DecisionPoints.Count; i++)
         {
-            if(chosenPoint < DecisionPoints[i])
+            chosenIndex = i;
+            if (chosenPoint < DecisionPoints[i])
             {
-                chosenIndex = i;
+                
                 break;
             }
             chosenPoint -= DecisionPoints[i];
+        }
+
+        if (DecisionPoints.Count != 2)
+        {
+            Debug.LogError("DecisionPoints must contain exactly 2 values.");
+            return;
         }
 
         DecisionPoints[chosenIndex] = 1;
@@ -173,33 +206,40 @@ public class GameManager : MonoBehaviour
         }
 
         EvaluateNPC();
+
+        Debug.Log("New Mapped");
     }
 
     public void QueryEnter(int anomoly)
     {
         if (CurrentFloor - offsetFloor == 0) return;
-        if(sleepQuery)
+        if (sleepQuery > 0)
         {
-            sleepQuery = false;
+            sleepQuery--;
             return;
         }
+        if (minQueryListenerTiming > 0.0f) return;
+        
+        minQueryListenerTiming = 3.0f;
         RestoreAnomoly();
         RestoreNPC();
         
         if (anomoly_flag == anomoly)
         {
-            Debug.Log("Correct Anomoly");
+            //Debug.Log("Correct Anomoly");
             
             if (!infinityMode)
             {
-                sleepQuery = true;
+                if(prevAnomoly >= 0)
+                {
+                    AnomolyManager.Correct(prevAnomoly);
+                }
                 CurrentFloor--;
                 if (CheckEndGame()) return;
             }
         }else
         {
-            Debug.Log("Wrong Anomoly");
-            if (CurrentFloor != 11) sleepQuery = true;
+            //Debug.Log("Wrong Anomoly");
             CurrentFloor = 11;
         }
 
@@ -212,7 +252,7 @@ public class GameManager : MonoBehaviour
 
     private bool CheckEndGame()
     {
-        if(CurrentFloor == 0)
+        if(CurrentFloor - offsetFloor == 0)
         {
             enabled = false;
             SceneManager.LoadScene("End");
@@ -223,7 +263,10 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        MaintainRender();
         MaintainInfinity();
+
+        minQueryListenerTiming -= Time.deltaTime;
     }
 
     // For anomolies that need to know where the player is (looker, doppelganger, lift swap...)
@@ -303,7 +346,7 @@ public class GameManager : MonoBehaviour
     // add_up_floor mean if it is the upper floor then call 1 if lower floow then call -1.
     public void ForceAnomoly(int add_up_floor, int anomoly_index)
     {
-        int new_floor = CurrentFloor + add_up_floor;
+        int new_floor = CurrentFloor + add_up_floor - offsetFloor;
         // An AddUp anomaly needs a real neighbour floor to appear on. If the chosen
         // side is past the 1..8 range (e.g. CurrentFloor pinned at 8 after a wrong
         // answer, direction +1 -> floor 9), fall back to the opposite side instead
@@ -311,7 +354,7 @@ public class GameManager : MonoBehaviour
         // one neighbour is always valid.
         if (new_floor < 1 || new_floor > 8) new_floor = CurrentFloor - add_up_floor;
         if (new_floor < 1 || new_floor > 8) return;
-        createdFloor[new_floor - 1].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
+        createdFloor[new_floor - 1 + offsetFloor].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
     }
 
     public void ForceRestoreAll()
@@ -324,7 +367,7 @@ public class GameManager : MonoBehaviour
 
     public void Flip()
     {
-        sleepQuery = true;
+        sleepQuery++;
         Transform floorTransform = createdFloor[CurrentFloor -1].transform;
 
         floorTransform.localScale = new Vector3( - floorTransform.localScale.x, floorTransform.localScale.y, floorTransform.localScale.z);
@@ -338,6 +381,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    public void AddUpQueryQueue()
+    {
+        sleepQuery++;
+    }
     public int GetCurrentFloor()
     {
         return CurrentFloor - offsetFloor;

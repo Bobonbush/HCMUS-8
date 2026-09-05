@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5ff89d15d6a5b47449cd1d87d767e00d, type: 3}
-  m_Name: Starter
+  m_Name: Warning
   m_EditorClassIdentifier: Assembly-CSharp::CutSceneInfo
   HideUI: 1
   StillHideUI: 0
@@ -21,7 +21,7 @@ MonoBehaviour:
   fadingTime: 2
   newScene: 1
   returnToMainMenu: 0
-  SceneID: Warning
+  SceneID: MainMenu
   SpawnID: 
   SpawnOffset: {x: 0, y: 0, z: 0}
   RealTimeAnimation: 0

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83d0b0481880beb49bd60646c38a5d1b, type: 3}
+  m_Name: Warning
+  m_EditorClassIdentifier: Assembly-CSharp::DialogNode
+  speakerName: HEALTH & SAFETY WARNING
+  text: 'This game contains flashing lights, rapidly changing images, intense visual
+    effects, and other lighting effects that may cause discomfort or trigger seizures
+    in some individuals.
+
+
+    If you have a history of epilepsy, seizures, heart
+    conditions, or are sensitive to flashing or strobing lights, please consult a
+    doctor before playing.
+
+
+    Stop playing immediately and seek medical attention
+    if you experience dizziness, nausea, headaches, blurred vision, muscle twitching,
+    loss of awareness, or any other unusual symptoms.
+
+
+    Player discretion is
+    advised.'
+  choices: []

@@ -59,6 +59,7 @@ namespace Game.UI
             { "menu.options", new[] { "Options", "Tùy chỉnh" } },
             { "menu.quit_desktop", new[] { "Quit To Desktop", "Thoát game" } },
             { "menu.resume", new[] { "Resume", "Tiếp tục" } },
+            { "menu.paused", new[] { "Paused", "Tạm dừng" } },
             { "menu.quit_main", new[] { "Quit To Main", "Về màn hình chính" } },
             { "menu.back", new[] { "Back", "Quay lại" } },
             { "menu.reset_defaults", new[] { "Reset Defaults", "Khôi phục mặc định" } },
