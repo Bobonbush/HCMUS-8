@@ -2586,8 +2586,8 @@ Transform:
   m_GameObject: {fileID: 300442798414505534}
   serializedVersion: 2
   m_LocalRotation: {x: -0.50058526, y: -0.49941415, z: 0.50058526, w: 0.49941415}
-  m_LocalPosition: {x: -0.595641, y: -0.02117624, z: 0.019379113}
-  m_LocalScale: {x: 0.04713768, y: 0.12939228, z: 0.24964575}
+  m_LocalPosition: {x: -0.6, y: -0.035, z: 0.01}
+  m_LocalScale: {x: 0.043790907, y: 0.12024425, z: 0.23192091}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3484188396549300382}
@@ -19127,7 +19127,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -5.728958, y: 2.973, z: 7.463}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2788350512993320348}
   - {fileID: 7960421912487183315}
@@ -51095,8 +51095,8 @@ Transform:
   m_GameObject: {fileID: 6076365417394252025}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0008280872, y: -0.70710635, z: 0.0008280872, w: 0.70710635}
-  m_LocalPosition: {x: -0.61154366, y: 0.0028558814, z: 0.0137269525}
-  m_LocalScale: {x: 0.12567085, y: 0.04578197, z: 0.2424657}
+  m_LocalPosition: {x: -0.61, y: -0.005, z: 0.03}
+  m_LocalScale: {x: 0.10078802, y: 0.036735453, z: 0.19445749}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8073693993805630129}
@@ -66773,6 +66773,11 @@ MonoBehaviour:
   - {fileID: 6882664496128918543}
   - {fileID: 4688435853125573117}
   - {fileID: 5403824151713325399}
+  - {fileID: 4973968917615683990}
+  - {fileID: 6082116009133311736}
+  - {fileID: 6199022395308011417}
+  - {fileID: 5144860625143798072}
+  - {fileID: 5687878966834781571}
   targetScale: 1.6
   growDuration: 45
 --- !u!1 &8251783446442158030
@@ -74636,7 +74641,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Anomoly16
   echoDelay: 0.45
   followDistance: 2.2
-  echoVolume: 0.55
+  echoVolume: 1
 --- !u!1 &9194345669944106192
 GameObject:
   m_ObjectHideFlags: 0
@@ -98039,6 +98044,11 @@ Transform:
 --- !u!1 &1446372823865898319 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -293203802875518696, guid: 0402e39a9a4d160418c265ae5815e01c, type: 3}
+  m_PrefabInstance: {fileID: 8069563064523002967}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4973968917615683990 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6126075566428734015, guid: 0402e39a9a4d160418c265ae5815e01c, type: 3}
   m_PrefabInstance: {fileID: 8069563064523002967}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8097651940306818054
