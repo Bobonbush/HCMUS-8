@@ -41,6 +41,8 @@ ExportedObj/
 *.sln
 *.suo
 *.tmp
+*~
+*.bak
 *.user
 *.userprefs
 *.pidb

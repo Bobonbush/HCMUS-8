@@ -36,6 +36,8 @@ namespace Game.UI
         public virtual bool Navigable => isActiveAndEnabled;
 
         private bool useAlternateColor;
+        private bool useCustomTheme;
+        private Color customResting, customAlternate, customSelected, customInk, customAccent;
         /// <summary>0 = resting, 1 = selected. Animated so the highlight slides instead of snapping.</summary>
         private float highlight;
 
@@ -64,6 +66,18 @@ namespace Game.UI
             OnSelectionChanged(selected);
         }
 
+        /// <summary>Applies a screen-specific palette without changing the shared pause-menu theme.</summary>
+        public void SetVisualTheme(Color resting, Color alternate, Color selected, Color ink, Color accent)
+        {
+            useCustomTheme = true;
+            customResting = resting;
+            customAlternate = alternate;
+            customSelected = selected;
+            customInk = ink;
+            customAccent = accent;
+            Repaint();
+        }
+
         protected virtual void OnSelectionChanged(bool selected) { }
 
         /// <summary>Left/right input, or the ◀ ▶ buttons. Default does nothing.</summary>
@@ -88,19 +102,22 @@ namespace Game.UI
 
         private void Repaint()
         {
-            Color resting = useAlternateColor ? UITheme.RowAlt : UITheme.Row;
+            Color resting = useCustomTheme
+                ? (useAlternateColor ? customAlternate : customResting)
+                : (useAlternateColor ? UITheme.RowAlt : UITheme.Row);
+            Color selected = useCustomTheme ? customSelected : UITheme.RowSelected;
 
             if (background != null)
-                background.color = Color.Lerp(resting, UITheme.RowSelected, highlight);
+                background.color = Color.Lerp(resting, selected, highlight);
 
             // The ink does not change — it is the strip that brightens. Swapping text colour as well
             // would make the selection flash and hurt to read down a list.
-            Color ink = UITheme.Ink;
+            Color ink = useCustomTheme ? customInk : UITheme.Ink;
             if (labelText != null) labelText.color = ink;
 
             if (accentBar != null)
             {
-                Color accent = UITheme.Accent;
+                Color accent = useCustomTheme ? customAccent : UITheme.Accent;
                 accent.a *= highlight;
                 accentBar.color = accent;
             }

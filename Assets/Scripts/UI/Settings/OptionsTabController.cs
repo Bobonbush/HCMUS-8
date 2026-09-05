@@ -55,6 +55,14 @@ namespace Game.UI
 
         public int ActiveTab => activeTab;
 
+        public void SetVisualTheme(Color activeBackground, Color inactiveBackground, Color activeText, Color inactiveText)
+        {
+            activeTabColor = activeBackground;
+            inactiveTabColor = inactiveBackground;
+            activeTabTextColor = activeText;
+            inactiveTabTextColor = inactiveText;
+        }
+
         private void Awake()
         {
             if (rowMenu == null) rowMenu = GetComponentInChildren<RowMenu>(true);

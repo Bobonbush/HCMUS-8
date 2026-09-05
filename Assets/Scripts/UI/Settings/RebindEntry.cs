@@ -36,6 +36,8 @@ namespace Game.UI
 
         private bool listening;
         private BindingDevice listeningDevice;
+        private Color columnInk = new Color(0.72f, 1f, 0.84f, 1f);
+        private Color columnMuted = new Color(0.46f, 0.68f, 0.54f, 1f);
         /// <summary>0 = keyboard column, 1 = gamepad column.</summary>
         private int column;
 
@@ -119,6 +121,13 @@ namespace Game.UI
 
         protected override void OnColorsApplied(Color foreground)
         {
+            // Keep the rebind columns in the active Options palette. Previously this method
+            // repainted them with UITheme.Ink, undoing the holographic text colour.
+            columnInk = foreground;
+            columnMuted = Color.Lerp(
+                foreground,
+                new Color(0.08f, 0.18f, 0.13f, foreground.a),
+                0.38f);
             PaintColumns();
         }
 
@@ -202,15 +211,15 @@ namespace Game.UI
             bool showFocus = IsSelected;
 
             if (keyboardLabel != null)
-                keyboardLabel.color = !showFocus || column == 0 ? UITheme.Ink : UITheme.InkMuted;
+                keyboardLabel.color = !showFocus || column == 0 ? columnInk : columnMuted;
 
             if (gamepadLabel == null) return;
 
             // A locked cell stays greyed whatever the selection is doing, so it reads as information
             // rather than as something you failed to click.
             gamepadLabel.color = !GamepadEditable
-                ? UITheme.InkMuted
-                : (!showFocus || column == 1 ? UITheme.Ink : UITheme.InkMuted);
+                ? columnMuted
+                : (!showFocus || column == 1 ? columnInk : columnMuted);
         }
     }
 }
