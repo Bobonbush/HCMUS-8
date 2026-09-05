@@ -24,6 +24,9 @@ public class GameManager : MonoBehaviour
 
     private int offsetFloor = 3;
 
+    [Tooltip("Floors further than this many floors from the current one are deactivated (not rendered, not simulated).")]
+    [SerializeField] private int renderRadius = 4;
+
     List<int> DecisionPoints = new List<int>(){ 1, 1 };
 
     List<GameObject> createdFloor = new List<GameObject>() ;
@@ -63,6 +66,8 @@ public class GameManager : MonoBehaviour
             floor.transform.position = new Vector3(42.33f, (i - CurrentFloor) * offset, -99.65f);
             createdFloor.Add(floor);
         }
+
+        MaintainRender();
     }
 
     // should be one or minus one only
@@ -74,6 +79,22 @@ public class GameManager : MonoBehaviour
             position.y += offset * unit;
             createdFloor[i].transform.position = position;
         }  
+    }
+
+    // Only floors within renderRadius of CurrentFloor stay active. The player never leaves
+    // createdFloor[CurrentFloor - 1] (MaintainInfinity shifts the stack around them), so floors
+    // further away than that are never visible and do not need their lights, NPCs and
+    // anomaly scripts running. Cheap to call every frame: SetActive only runs on a change.
+    private void MaintainRender()
+    {
+        for (int i = 0; i < createdFloor.Count; i++)
+        {
+            bool shouldRender = Mathf.Abs((i + 1) - CurrentFloor) <= renderRadius;
+            if (createdFloor[i].activeSelf != shouldRender)
+            {
+                createdFloor[i].SetActive(shouldRender);
+            }
+        }
     }
 
     private void MaintainInfinity()
@@ -231,6 +252,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        MaintainRender();
         MaintainInfinity();
 
         minQueryListenerTiming -= Time.deltaTime;
