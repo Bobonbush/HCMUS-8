@@ -15,6 +15,11 @@ public class AnomolyManager : MonoBehaviour
     
     public List<MonoBehaviour> anomolies;
 
+
+    public static List<int> usingAnomolies = new List<int>();
+
+    private static int anomolizeSize;
+
     private Anomoly.EvaluateType _currentType;
 
     public Anomoly.EvaluateType currentType {
@@ -36,7 +41,19 @@ public class AnomolyManager : MonoBehaviour
 
     private void Start()
     {
+        anomolizeSize = anomolies.Count;
+        if (usingAnomolies.Count == 0) {
+            ResetUsingAnomolies();
+        }
         RestoreNPC();
+    }
+
+    private static void ResetUsingAnomolies()
+    {
+        for(int i = 0; i < anomolizeSize; i++)
+        {
+            usingAnomolies.Add(i);
+        }
     }
 
 
@@ -105,6 +122,14 @@ public class AnomolyManager : MonoBehaviour
         currentAnomoly.Evaluate();
     }
 
+    public static void Correct(int ano)
+    {
+        usingAnomolies.Remove(ano);
+        if(usingAnomolies.Count == 0 )
+        {
+            ResetUsingAnomolies();
+        }
+    }
 
 
     public int GenerateAnomoly(int prevv = -1)
@@ -112,8 +137,11 @@ public class AnomolyManager : MonoBehaviour
         ForceRestore();
         
 
-        int size = anomolies.Count;
-        int randomMize = Random.Range(0, size);
+        int size = usingAnomolies.Count;
+        int randomMized = Random.Range(0, size);
+        int randomMize = usingAnomolies[randomMized];
+
+        Debug.Log("Anomoly #" + randomMize);
 
 
         

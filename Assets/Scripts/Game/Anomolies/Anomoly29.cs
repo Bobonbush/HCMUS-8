@@ -101,6 +101,8 @@ public class Anomoly29 : MonoBehaviour, Anomoly
             // it so nothing looks or sounds out of place.
             ElevatorSounds boarded = NearestCabin(insideA ? liftTriggerA.position : liftTriggerB.position);
             ElevatorSounds destination = NearestCabin(insideA ? liftTriggerB.position : liftTriggerA.position);
+
+            GameManager.Instance.AddUpQueryQueue();
             if (destination != null) destination.AdoptRideFrom(boarded);
         }
     }

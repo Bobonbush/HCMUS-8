@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
 
     private int prevAnomoly = -1;
     
-    private int maxFloor = 15;
+    private int maxFloor = 14;
 
 
     private int offsetFloor = 3;
@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     private bool infinityMode = false;
 
-    private bool sleepQuery = true;
+    private int sleepQuery = 1;
 
 
     private void Awake()
@@ -178,11 +178,12 @@ public class GameManager : MonoBehaviour
     public void QueryEnter(int anomoly)
     {
         if (CurrentFloor - offsetFloor == 0) return;
-        if(sleepQuery)
+        if(sleepQuery  > 0)
         {
-            sleepQuery = false;
+            sleepQuery--;
             return;
         }
+        sleepQuery++;
         RestoreAnomoly();
         RestoreNPC();
         
@@ -192,14 +193,17 @@ public class GameManager : MonoBehaviour
             
             if (!infinityMode)
             {
-                sleepQuery = true;
+                if(prevAnomoly >= 0)
+                {
+                    AnomolyManager.Correct(prevAnomoly);
+                }
                 CurrentFloor--;
                 if (CheckEndGame()) return;
             }
         }else
         {
             Debug.Log("Wrong Anomoly");
-            if (CurrentFloor != 11) sleepQuery = true;
+            if (CurrentFloor == 11) sleepQuery--;
             CurrentFloor = 11;
         }
 
@@ -212,7 +216,7 @@ public class GameManager : MonoBehaviour
 
     private bool CheckEndGame()
     {
-        if(CurrentFloor == 0)
+        if(CurrentFloor - offsetFloor == 0)
         {
             enabled = false;
             SceneManager.LoadScene("End");
@@ -303,7 +307,7 @@ public class GameManager : MonoBehaviour
     // add_up_floor mean if it is the upper floor then call 1 if lower floow then call -1.
     public void ForceAnomoly(int add_up_floor, int anomoly_index)
     {
-        int new_floor = CurrentFloor + add_up_floor;
+        int new_floor = CurrentFloor + add_up_floor - offsetFloor;
         // An AddUp anomaly needs a real neighbour floor to appear on. If the chosen
         // side is past the 1..8 range (e.g. CurrentFloor pinned at 8 after a wrong
         // answer, direction +1 -> floor 9), fall back to the opposite side instead
@@ -324,7 +328,7 @@ public class GameManager : MonoBehaviour
 
     public void Flip()
     {
-        sleepQuery = true;
+        sleepQuery++;
         Transform floorTransform = createdFloor[CurrentFloor -1].transform;
 
         floorTransform.localScale = new Vector3( - floorTransform.localScale.x, floorTransform.localScale.y, floorTransform.localScale.z);
@@ -338,6 +342,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    public void AddUpQueryQueue()
+    {
+        sleepQuery++;
+    }
     public int GetCurrentFloor()
     {
         return CurrentFloor - offsetFloor;
