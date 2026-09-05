@@ -13,6 +13,10 @@ public class ElevatorDisplay : MonoBehaviour
 
     [HideInInspector]
     public int setAnomoly = 0;
+
+
+    [SerializeField]
+    private bool isElevatorNumber = true;
     int state = 0;
     
     void Start()
@@ -31,6 +35,12 @@ public class ElevatorDisplay : MonoBehaviour
         timing = timeMax;
 
         state ^= 1;
+        if (!isElevatorNumber)
+        {
+            GetComponent<SpriteRenderer>().enabled = (state > 0);
+            return;
+        }
+        
 
         if (GameManager.Instance != null)
         {
