@@ -149,6 +149,7 @@ public class AnomolyManager : MonoBehaviour
 
         Debug.Log("Anomoly #" + randomMize);
 
+
         
         if (anomolies[randomMize] is Anomoly anomoly)
         {

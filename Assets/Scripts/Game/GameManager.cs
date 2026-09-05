@@ -177,6 +177,12 @@ public class GameManager : MonoBehaviour
             chosenPoint -= DecisionPoints[i];
         }
 
+        if (DecisionPoints.Count != 2)
+        {
+            Debug.LogError("DecisionPoints must contain exactly 2 values.");
+            return;
+        }
+
         DecisionPoints[chosenIndex] = 1;
         DecisionPoints[chosenIndex ^ 1] += 1;
 
@@ -348,7 +354,7 @@ public class GameManager : MonoBehaviour
         // one neighbour is always valid.
         if (new_floor < 1 || new_floor > 8) new_floor = CurrentFloor - add_up_floor;
         if (new_floor < 1 || new_floor > 8) return;
-        createdFloor[new_floor - 1].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
+        createdFloor[new_floor - 1 + offsetFloor].GetComponent<AnomolyManager>().ForceAnomoly(anomoly_index);
     }
 
     public void ForceRestoreAll()
