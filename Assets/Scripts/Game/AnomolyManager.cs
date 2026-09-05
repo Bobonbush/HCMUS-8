@@ -39,12 +39,18 @@ public class AnomolyManager : MonoBehaviour
      * 
     */
 
-    private void Start()
+
+    private void Awake()
     {
         anomolizeSize = anomolies.Count;
-        if (usingAnomolies.Count == 0) {
+        if (usingAnomolies.Count == 0)
+        {
             ResetUsingAnomolies();
         }
+        
+    }
+    private void Start()
+    {
         RestoreNPC();
     }
 
@@ -141,7 +147,7 @@ public class AnomolyManager : MonoBehaviour
         int randomMized = Random.Range(0, size);
         int randomMize = usingAnomolies[randomMized];
 
-
+        Debug.Log("Anomoly #" + randomMize);
 
         
         if (anomolies[randomMize] is Anomoly anomoly)

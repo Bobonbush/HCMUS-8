@@ -54,6 +54,8 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         LoadFloor();
+        RestoreAnomoly();
+        RestoreNPC();
         NewMap();
     }
 
@@ -116,6 +118,7 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateAnomoly()
     {
+        Debug.Log("Called");
         prevAnomoly =  createdFloor[CurrentFloor - 1].GetComponent<AnomolyManager>().GenerateAnomoly(prevAnomoly);
     }
 
@@ -162,11 +165,13 @@ public class GameManager : MonoBehaviour
         int dice = 0;
         int chosenPoint = Random.Range(0, total);
         int chosenIndex = 0;
-        for(int i = 0; i < DecisionPoints.Count; i++)
+
+        for (int i = 0; i < DecisionPoints.Count; i++)
         {
-            if(chosenPoint < DecisionPoints[i])
+            chosenIndex = i;
+            if (chosenPoint < DecisionPoints[i])
             {
-                chosenIndex = i;
+                
                 break;
             }
             chosenPoint -= DecisionPoints[i];
