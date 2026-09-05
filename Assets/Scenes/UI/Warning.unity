@@ -929,7 +929,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Warning
+  m_text: HEALTH & SAFETY WARNING
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
   m_sharedMaterial: {fileID: 726396283194482549, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
@@ -995,7 +995,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -274.9923, w: 0}
+  m_margin: {x: 0, y: 0, z: -513.0799, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1312,7 +1312,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 14, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2069690214
@@ -1335,7 +1335,23 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 'This game contains flashing lights, rapidly changing images, intense visual
+    effects, and other lighting effects that may cause discomfort or trigger seizures
+    in some individuals.
+
+
+    If you have a history of epilepsy, seizures, heart
+    conditions, or are sensitive to flashing or strobing lights, please consult a
+    doctor before playing.
+
+
+    Stop playing immediately and seek medical attention
+    if you experience dizziness, nausea, headaches, blurred vision, muscle twitching,
+    loss of awareness, or any other unusual symptoms.
+
+
+    Player discretion is
+    advised.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
   m_sharedMaterial: {fileID: 726396283194482549, guid: acab93b43c9724e4fa8bfd1d88f3a5b1, type: 2}
@@ -1362,8 +1378,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28
-  m_fontSizeBase: 28
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1401,7 +1417,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 59.035645, y: 0, z: 101.233826, w: 0}
+  m_margin: {x: 87.03821, y: 0, z: 126.53961, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

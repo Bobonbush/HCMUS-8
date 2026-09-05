@@ -17,7 +17,7 @@ MonoBehaviour:
   useDialog: 1
   useBigDialog: 1
   delayTime: 2
-  showTime: 3
+  showTime: 5
   fadingTime: 2
   newScene: 1
   returnToMainMenu: 0

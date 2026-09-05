@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83d0b0481880beb49bd60646c38a5d1b, type: 3}
   m_Name: Warning
   m_EditorClassIdentifier: Assembly-CSharp::DialogNode
-  speakerName: "\u26A0\uFE0F HEALTH & SAFETY WARNING"
+  speakerName: HEALTH & SAFETY WARNING
   text: 'This game contains flashing lights, rapidly changing images, intense visual
     effects, and other lighting effects that may cause discomfort or trigger seizures
     in some individuals.
